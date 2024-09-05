@@ -1,6 +1,8 @@
 const express = require("express");
 const { ApolloServer } = require("@apollo/server");
 const { expressMiddleware } = require("@apollo/server/express4");
+const { typeDefs } = require("./graphql/schema");
+const { resolvers } = require("./graphql/resolvers");
 
 async function init() {
   const app = express();
@@ -10,18 +12,8 @@ async function init() {
 
   // Create Graphql server
   const gqlServer = new ApolloServer({
-    typeDefs: `
-      type Query {
-      hello: String
-      say(name: String): String
-      }
-    `,
-    resolvers: {
-      Query: {
-        hello: () => `Hey there, I am a graphql server`,
-        say: (_, { name }) => `Hey ${name}, How are you ?`,
-      },
-    },
+    typeDefs,
+    resolvers,
   });
 
   // Start the gql server
