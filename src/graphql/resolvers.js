@@ -1,94 +1,176 @@
 const { PrismaClient } = require("@prisma/client");
+const { authenticate, authorize } = require('../db/db.config.js'); 
 
 const prisma = new PrismaClient();
 
 const resolvers = {
   Query: {
-    products: async () => await prisma.product.findMany(),
-    product: async (_, { id }) =>
-      await prisma.product.findUnique({ where: { id } }),
-    categories: async () => await prisma.category.findMany(),
-    category: async (_, { id }) =>
-      await prisma.category.findUnique({ where: { id } }),
-  },
-  Mutation: {
-    addProduct: async (
-      _,
-      { name, description, price, inStock, categoryId, image }
-    ) => {
-      return await prisma.product.create({
-        data: {
-          name,
-          description,
-          price,
-          inStock,
-          category: { connect: { id: categoryId } },
-          image, // Optional field
-        },
-      });
-    },
-    updateProduct: async (
-      _,
-      { id, name, description, price, inStock, categoryId, image }
-    ) => {
-      return await prisma.product.update({
-        where: { id },
-        data: {
-          name,
-          description,
-          price,
-          inStock,
-          category: categoryId ? { connect: { id: categoryId } } : undefined,
-          image, // Optional field
-        },
-      });
-    },
-    deleteProduct: async (_, { id }) => {
+    products: async (_, args, context) => {
       try {
+        authenticate(context.req); // Ensure user is authenticated
+        const products = await prisma.product.findMany();
+        return products;
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        throw new Error("Unable to fetch products");
+      }
+    },
+    product: async (_, { id }, context) => {
+      try {
+        authenticate(context.req); // Ensure user is authenticated
+        const product = await prisma.product.findUnique({ where: { id } });
+        if (!product) throw new Error("Product not found");
+        return product;
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        throw new Error("Unable to fetch product");
+      }
+    },
+    categories: async (_, args, context) => {
+      try {
+        authenticate(context.req); // Ensure user is authenticated
+        const categories = await prisma.category.findMany();
+        return categories;
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        throw new Error("Unable to fetch categories");
+      }
+    },
+    category: async (_, { id }, context) => {
+      try {
+        authenticate(context.req); // Ensure user is authenticated
+        const category = await prisma.category.findUnique({ where: { id } });
+        if (!category) throw new Error("Category not found");
+        return category;
+      } catch (error) {
+        console.error("Error fetching category:", error);
+        throw new Error("Unable to fetch category");
+      }
+    },
+  },
+
+  Mutation: {
+    addProduct: async (_, { name, description, price, inStock, categoryId, image }, context) => {
+      try {
+        authenticate(context.req); // Authenticate user
+        authorize(['ADMIN', 'BUSINESS_OWNER'])(context.req); // Only admin/business owner
+
+        const product = await prisma.product.create({
+          data: {
+            name,
+            description,
+            price,
+            inStock,
+            category: { connect: { id: categoryId } },
+            image, // Optional field
+          },
+        });
+        return product;
+      } catch (error) {
+        console.error("Error adding product:", error);
+        throw new Error("Unable to add product");
+      }
+    },
+    updateProduct: async (_, { id, name, description, price, inStock, categoryId, image }, context) => {
+      try {
+        authenticate(context.req); // Authenticate user
+        authorize(['ADMIN', 'BUSINESS_OWNER'])(context.req); // Only admin/business owner
+
+        const product = await prisma.product.update({
+          where: { id },
+          data: {
+            name,
+            description,
+            price,
+            inStock,
+            category: categoryId ? { connect: { id: categoryId } } : undefined,
+            image, // Optional field
+          },
+        });
+        return product;
+      } catch (error) {
+        console.error("Error updating product:", error);
+        throw new Error("Unable to update product");
+      }
+    },
+    deleteProduct: async (_, { id }, context) => {
+      try {
+        authenticate(context.req); // Authenticate user
+        authorize(['ADMIN'])(context.req); // Only admin
+
         await prisma.product.delete({ where: { id } });
         return true;
-      } catch {
+      } catch (error) {
+        console.error("Error deleting product:", error);
         return false;
       }
     },
-    addCategory: async (_, { name, image }) => {
-      return await prisma.category.create({
-        data: {
-          name,
-          image, // Optional field
-        },
-      });
-    },
-    updateCategory: async (_, { id, name, image }) => {
-      return await prisma.category.update({
-        where: { id },
-        data: {
-          name,
-          image, // Optional field
-        },
-      });
-    },
-    deleteCategory: async (_, { id }) => {
+    addCategory: async (_, { name, image }, context) => {
       try {
+        authenticate(context.req); // Authenticate user
+        authorize(['ADMIN'])(context.req); // Only admin
+
+        const category = await prisma.category.create({
+          data: { name, image },
+        });
+        return category;
+      } catch (error) {
+        console.error("Error adding category:", error);
+        throw new Error("Unable to add category");
+      }
+    },
+    updateCategory: async (_, { id, name, image }, context) => {
+      try {
+        authenticate(context.req); // Authenticate user
+        authorize(['ADMIN'])(context.req); // Only admin
+
+        const category = await prisma.category.update({
+          where: { id },
+          data: { name, image },
+        });
+        return category;
+      } catch (error) {
+        console.error("Error updating category:", error);
+        throw new Error("Unable to update category");
+      }
+    },
+    deleteCategory: async (_, { id }, context) => {
+      try {
+        authenticate(context.req); // Authenticate user
+        authorize(['ADMIN'])(context.req); // Only admin
+
         await prisma.category.delete({ where: { id } });
         return true;
-      } catch {
+      } catch (error) {
+        console.error("Error deleting category:", error);
         return false;
       }
     },
   },
+
   Product: {
     category: async (parent) => {
-      return await prisma.category.findUnique({
-        where: { id: parent.categoryId },
-      });
+      try {
+        return await prisma.category.findUnique({
+          where: { id: parent.categoryId },
+        });
+      } catch (error) {
+        console.error("Error fetching category for product:", error);
+        throw new Error("Unable to fetch category");
+      }
     },
   },
+
   Category: {
     products: async (parent) => {
-      return await prisma.product.findMany({
-        where: { categoryId: parent.id },
-      });
+      try {
+        return await prisma.product.findMany({
+          where: { categoryId: parent.id },
+        });
+      } catch (error) {
+        console.error("Error fetching products for category:", error);
+        throw new Error("Unable to fetch products for category");
+      }
     },
   },
 };
