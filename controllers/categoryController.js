@@ -11,6 +11,7 @@ const getAllCategories = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 const addCategory = async (req, res) => {
   const { name } = req.body;
   try {
@@ -35,7 +36,7 @@ const deleteCategory = async (req, res) => {
   const { id } = req.params;
   try {
     const categoryExists = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: id },
     });
 
     if (!categoryExists) {
@@ -43,7 +44,7 @@ const deleteCategory = async (req, res) => {
     }
 
     const category = await prisma.category.delete({
-      where: { id: parseInt(id) },
+      where: { id: id },
     });
     res.json(category);
   } catch (error) {
@@ -52,11 +53,11 @@ const deleteCategory = async (req, res) => {
 };
 
 const updateCategory = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // ID is a string (UUID)
   const { name } = req.body;
   try {
     const categoryExists = await prisma.category.findUnique({
-      where: { id: parseInt(id) },
+      where: { id }, // Directly use the string ID without converting to integer
     });
 
     if (!categoryExists) {
@@ -64,7 +65,7 @@ const updateCategory = async (req, res) => {
     }
 
     const category = await prisma.category.update({
-      where: { id: parseInt(id) },
+      where: { id }, // Directly use the string ID
       data: { name },
     });
     res.json(category);

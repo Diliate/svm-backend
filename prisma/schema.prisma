@@ -14,22 +14,23 @@ datasource db {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String
   price       Float
   indications String
   description String
   inStock     Boolean
   category    Category @relation(fields: [categoryId], references: [id])
-  categoryId  Int
+  categoryId  String
   precautions String[]
   punchline   String
   quantity    String
   dosage      String
+  imageUrl    String?
 }
 
 model Category {
-  id       Int       @id @default(autoincrement())
+  id       String    @id @default(uuid())
   name     String    @unique
   products Product[]
 }
@@ -39,7 +40,6 @@ model User {
   name      String
   email     String   @unique
   password  String
-  isAdmin   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
