@@ -1,21 +1,26 @@
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const productRoutes = require("./routes/productRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const authRoutes = require("./routes/authRoutes");
 
-const express = require('express');
-const dotenv = require('dotenv');
-const authRoutes = require('./routes/authRoutes'); 
-
-dotenv.config(); 
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware to parse JSON
+app.use(cors());
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+app.use("/uploads", express.static("uploads"));
 
-// Root Endpoint
-app.get('/', (req, res) => {
-  res.send('Welcome to the E-commerce Auth API');
+app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/auth", authRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the E-commerce Auth API");
 });
 
 app.listen(PORT, () => {

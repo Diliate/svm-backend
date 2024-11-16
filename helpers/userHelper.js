@@ -1,5 +1,6 @@
+// models/userModel.js
 
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // Create a new user
@@ -30,8 +31,18 @@ const findUserById = async (id) => {
   return user;
 };
 
+// Update a user by ID
+const updateUser = async (id, data) => {
+  const user = await prisma.user.update({
+    where: { id },
+    data,
+  });
+  return user;
+};
+
 module.exports = {
   createUser,
   findUserByEmail,
   findUserById,
+  updateUser, // Export the update function
 };
