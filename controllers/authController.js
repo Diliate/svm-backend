@@ -3,7 +3,11 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const { findUserByEmail, createUser } = require("../helpers/userHelper");
+const {
+  findUserByEmail,
+  createUser,
+  updateUser,
+} = require("../helpers/userHelper");
 
 // Registration Controller
 const register = async (req, res) => {
@@ -104,7 +108,33 @@ const login = async (req, res) => {
   }
 };
 
+const updateUserDetails = async (req, res) => {
+  const { id } = req.user; // Extract user ID from the token (from `protect` middleware)
+  const { name, email, address, mobile } = req.body;
+
+  try {
+    // Validate input fields if necessary
+    if (!name || !email) {
+      return res
+        .status(400)
+        .json({ message: "Name and email are required fields." });
+    }
+
+    // Update user details
+    const updatedUser = await updateUser(id, { name, email, address, mobile });
+
+    res.status(200).json({
+      message: "User details updated successfully.",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
 module.exports = {
   register,
   login,
+  updateUserDetails,
 };

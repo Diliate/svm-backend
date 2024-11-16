@@ -1,8 +1,13 @@
 // routes/authRoutes.js
 
 const express = require("express");
-const { register, login } = require("../controllers/authController");
+const {
+  register,
+  login,
+  updateUserDetails,
+} = require("../controllers/authController");
 const { body } = require("express-validator");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -28,5 +33,7 @@ router.post(
   ],
   login
 );
+
+router.put("/update", protect, updateUserDetails);
 
 module.exports = router;

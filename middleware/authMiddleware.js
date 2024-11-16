@@ -4,33 +4,40 @@ const { findUserById } = require("../helpers/userHelper");
 const protect = async (req, res, next) => {
   let token;
 
+  // Extract token from the Authorization header
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    try {
-      // Get token from header
-      token = req.headers.authorization.split(" ")[1];
-
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Get user from the token
-      req.user = await findUserById(decoded.id);
-
-      if (!req.user) {
-        return res.status(401).json({ message: "Not authorized." });
-      }
-
-      next();
-    } catch (error) {
-      console.error(error);
-      res.status(401).json({ message: "Not authorized, token failed." });
-    }
+    token = req.headers.authorization.split(" ")[1];
   }
 
   if (!token) {
-    res.status(401).json({ message: "Not authorized, no token." });
+    return res
+      .status(401)
+      .json({ message: "Not authorized, no token provided." });
+  }
+
+  try {
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Fetch the user associated with the token
+    const user = await findUserById(decoded.id);
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Not authorized, user not found." });
+    }
+
+    // Attach user to the request
+    req.user = user;
+
+    next();
+  } catch (error) {
+    console.error("Authorization error:", error);
+    return res.status(401).json({ message: "Not authorized, invalid token." });
   }
 };
 
