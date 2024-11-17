@@ -1,0 +1,129 @@
+
+const express = require("express");
+const dotenv = require("dotenv");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const rateLimit = require("express-rate-limit");
+const path = require("path");
+
+dotenv.config();
+
+// Import Routes
+const productRoutes = require("./routes/productRoutes");
+const categoryRoutes = require("./routes/categoryRoutes");
+const authRoutes = require("./routes/authRoutes");
+const razorpayRoutes = require("./routes/razorpayRoutes"); // Razorpay routes
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+
+
+// Set security HTTP headers
+app.use(helmet());
+
+// Logger middleware using morgan
+app.use(morgan("dev"));
+
+// Rate limiting middleware to prevent brute-force attacks and denial-of-service attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 100,
+  message: {
+    status: 429,
+    error: "Too many requests from this IP, please try again after 15 minutes",
+  },
+});
+app.use(limiter);
+
+// Enable CORS with default settings
+app.use(cors());
+
+// Body parser to parse JSON bodies
+app.use(express.json());
+
+// Serve static files from the 'uploads' directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Authentication Middleware
+const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Authentication failed" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  // Dummy verification - replace with real JWT verification
+  if (token !== "valid_token") {
+    return res.status(401).json({ error: "Authentication failed" });
+  }
+
+  // If token is valid
+  req.user = { id: 1, name: "John Doe" }; // Example user
+  next();
+};
+
+// Apply authentication middleware to protected routes only
+app.use("/api/products", authenticate, productRoutes);
+app.use("/api/categories", authenticate, categoryRoutes);
+app.use("/api/auth", authRoutes); 
+app.use("/api/razorpay", razorpayRoutes); 
+
+
+// Home route
+app.get("/", (req, res) => {
+  res.send("Welcome to the E-commerce Auth API");
+});
+
+// 404 Handler
+// Handle undefined Routes
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: 404,
+    error: "Not Found",
+    message: "The requested resource was not found on this server.",
+  });
+  console.warn(`404 Not Found: ${req.originalUrl}`);
+});
+
+// Global Error Handler
+// Centralized error handling middleware
+app.use((err, req, res, next) => {
+  console.error(`Error: ${err.message}`);
+  console.error(err.stack);
+
+  // Determine the status code
+  const statusCode = err.statusCode || 500;
+
+  // Determine the error message
+  const message =
+    process.env.NODE_ENV === "production" && statusCode === 500
+      ? "Internal Server Error"
+      : err.message;
+
+  res.status(statusCode).json({
+    status: statusCode,
+    error: message,
+  });
+});
+
+// Start the Server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+// Handle Uncaught Exceptions
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+  process.exit(1); 
+});
+
+// Handle Unhandled Promise Rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  process.exit(1); 
+});
+
