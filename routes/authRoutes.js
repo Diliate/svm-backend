@@ -5,6 +5,7 @@ const {
   register,
   login,
   updateUserDetails,
+  getUserWithAddresses,
 } = require("../controllers/authController");
 const { body } = require("express-validator");
 const { protect } = require("../middleware/authMiddleware");
@@ -35,5 +36,7 @@ router.post(
 );
 
 router.put("/update", protect, updateUserDetails);
+
+router.get("/user", protect, getUserWithAddresses);
 
 module.exports = router;
