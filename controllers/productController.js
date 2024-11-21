@@ -23,7 +23,7 @@ const getFilteredProducts = async (req, res) => {
   let where = {};
 
   if (categoryId) {
-    where.categoryId = parseInt(categoryId);
+    where.categoryId = categoryId;
   }
   if (minPrice || maxPrice) {
     where.price = {};
@@ -55,31 +55,27 @@ const addProduct = async (req, res) => {
     indications,
     description,
     inStock,
-    categoryId, // UUID format
-    precautions, // This comes as a comma-separated string
+    categoryId,
+    precautions,
     punchline,
     quantity,
     dosage,
   } = req.body;
-  const imageUrl = req.file ? req.file.path : ""; // Handling the uploaded image
 
-  // Convert price to a float, as categoryId is now a UUID (string)
+  // Get uploaded image paths as an array
+  const imageUrls = req.files.map((file) => file.path);
+
+  // Parse other fields
   const parsedPrice = parseFloat(price);
-
-  // Convert precautions string to an array by splitting the string by commas
   const precautionsArray = precautions.split(",");
 
-  // Validate price format only
   if (isNaN(parsedPrice)) {
     return res.status(400).json({ message: "Invalid price format" });
   }
 
   try {
     const existingProduct = await prisma.product.findFirst({
-      where: {
-        name,
-        categoryId, // UUID is already a string, so no parsing needed
-      },
+      where: { name, categoryId },
     });
     if (existingProduct) {
       return res.status(409).json({ message: "Product already exists" });
@@ -92,12 +88,12 @@ const addProduct = async (req, res) => {
         indications,
         description,
         inStock: inStock === "true",
-        categoryId, // Directly use the UUID string
+        categoryId,
         precautions: precautionsArray,
         punchline,
         quantity,
         dosage,
-        imageUrl,
+        imageUrls, // Store multiple image URLs
       },
     });
     res.json(product);
@@ -110,7 +106,7 @@ const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
     const product = await prisma.product.delete({
-      where: { id }, // Pass id as a string, no need to parse
+      where: { id },
     });
     res.json(product);
   } catch (error) {
@@ -132,25 +128,27 @@ const updateProduct = async (req, res) => {
     quantity,
     dosage,
   } = req.body;
-  const imageUrl = req.file ? req.file.path : ""; // Handling the uploaded image
+
+  // Append new images to existing ones
+  const imageUrls = req.files.map((file) => file.path);
 
   try {
     const product = await prisma.product.update({
-      where: { id }, // Use id directly as a String
+      where: { id },
       data: {
         name,
-        price: parseFloat(price), // Convert price to a float
+        price: parseFloat(price),
         indications,
         description,
-        inStock: inStock === "true", // Convert inStock to a boolean
+        inStock: inStock === "true",
         categoryId,
         precautions: Array.isArray(precautions)
           ? precautions
-          : precautions.split(","), // Ensure precautions is an array
+          : precautions.split(","),
         punchline,
         quantity,
         dosage,
-        imageUrl,
+        imageUrls: { push: imageUrls }, // Append new images to existing ones
       },
     });
     res.json(product);

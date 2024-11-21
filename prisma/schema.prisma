@@ -20,7 +20,7 @@ model Product {
   punchline   String
   quantity    String
   dosage      String
-  imageUrl    String?
+  imageUrls   String[]
 }
 
 model Category {
