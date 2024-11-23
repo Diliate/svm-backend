@@ -70,6 +70,58 @@ const getFeaturedProducts = async (req, res) => {
   }
 };
 
+// GET: GET LIMITED OFFER PRODUCTS
+const getLimitedOfferProducts = async (req, res) => {
+  try {
+    const currentDateTime = new Date();
+    const products = await prisma.product.findMany({
+      where: {
+        limitedOffer: true,
+        discountExpiry: { gte: currentDateTime }, // Ensure the discount is valid
+        inStock: true,
+      },
+      include: { category: true },
+    });
+
+    if (products.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No limited offer products found" });
+    }
+
+    res.json(products);
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        error: "Failed to fetch limited offer products: " + error.message,
+      });
+  }
+};
+
+// GET: DISCOUNTED PRODUCTS
+const getDiscountedProducts = async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        discount: { gt: 0 }, // Products with a discount greater than 0
+        inStock: true,
+      },
+      include: { category: true },
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No discounted products found" });
+    }
+
+    res.json(products);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch discounted products: " + error.message });
+  }
+};
+
 // POST: ADD PRODUCT
 const addProduct = async (req, res) => {
   const {
@@ -191,4 +243,6 @@ module.exports = {
   getAllProducts,
   getFilteredProducts,
   getFeaturedProducts,
+  getLimitedOfferProducts,
+  getDiscountedProducts,
 };
