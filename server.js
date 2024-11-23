@@ -65,8 +65,8 @@ const authenticate = (req, res, next) => {
 };
 
 // Apply authentication middleware to protected routes only
-app.use("/api/products", authenticate, productRoutes);
-app.use("/api/categories", authenticate, categoryRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/addresses", addressRoutes);
 // app.use("/api/razorpay", razorpayRoutes);

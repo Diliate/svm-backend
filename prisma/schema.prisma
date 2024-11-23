@@ -8,19 +8,23 @@ datasource db {
 }
 
 model Product {
-  id          String   @id @default(uuid())
-  name        String
-  price       Float
-  indications String
-  description String
-  inStock     Boolean
-  category    Category @relation(fields: [categoryId], references: [id])
-  categoryId  String
-  precautions String[]
-  punchline   String
-  quantity    String
-  dosage      String
-  imageUrls   String[]
+  id             String    @id @default(uuid())
+  name           String
+  price          Float
+  indications    String
+  description    String
+  inStock        Boolean
+  category       Category  @relation(fields: [categoryId], references: [id])
+  categoryId     String
+  precautions    String[]
+  punchline      String
+  quantity       String
+  dosage         String
+  imageUrls      String[]
+  featured       Boolean   @default(false)
+  limitedOffer   Boolean   @default(false)
+  discount       Float? // Store discount percentage (e.g., 10.0 for 10%)
+  discountExpiry DateTime? // For time-sensitive discounts
 }
 
 model Category {
