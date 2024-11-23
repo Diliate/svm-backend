@@ -1,5 +1,6 @@
 const prisma = require("../DB/db.config");
 
+// GET: ALL PRODUCTS
 const getAllProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
@@ -16,6 +17,7 @@ const getAllProducts = async (req, res) => {
   }
 };
 
+// GET: FILTERED PRODUCTS (SHOP)
 const getFilteredProducts = async (req, res) => {
   const { categoryId, minPrice, maxPrice } = req.query;
 
@@ -48,6 +50,27 @@ const getFilteredProducts = async (req, res) => {
   }
 };
 
+// GET: FEATURED PRODUCTS
+const getFeaturedProducts = async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: { featured: true, inStock: true },
+      include: { category: true },
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No featured products found" });
+    }
+
+    res.json(products);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch featured products: " + error.message });
+  }
+};
+
+// POST: ADD PRODUCT
 const addProduct = async (req, res) => {
   const {
     name,
@@ -102,6 +125,7 @@ const addProduct = async (req, res) => {
   }
 };
 
+// DELETE: DELETE PRODUCT
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
@@ -114,6 +138,7 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+// PUT: UPDATE PRODUCT
 const updateProduct = async (req, res) => {
   const { id } = req.params;
   const {
@@ -165,4 +190,5 @@ module.exports = {
   updateProduct,
   getAllProducts,
   getFilteredProducts,
+  getFeaturedProducts,
 };
