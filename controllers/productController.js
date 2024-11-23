@@ -120,6 +120,34 @@ const getDiscountedProducts = async (req, res) => {
   }
 };
 
+// GET: SEARCH PRODUCTS
+const searchProducts = async (req, res) => {
+  const { query } = req.query; // Capture the query string from the request
+  if (!query) {
+    return res.status(400).json({ message: "Query string is required" });
+  }
+
+  try {
+    // Use Prisma to find products with a partial match
+    const products = await prisma.product.findMany({
+      where: {
+        name: {
+          contains: query, // Partial match for the product name
+          mode: "insensitive", // Case-insensitive search
+        },
+      },
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // POST: ADD PRODUCT
 const addProduct = async (req, res) => {
   const {
@@ -272,4 +300,5 @@ module.exports = {
   getFeaturedProducts,
   getLimitedOfferProducts,
   getDiscountedProducts,
+  searchProducts,
 };
