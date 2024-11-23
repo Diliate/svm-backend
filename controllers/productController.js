@@ -91,11 +91,9 @@ const getLimitedOfferProducts = async (req, res) => {
 
     res.json(products);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        error: "Failed to fetch limited offer products: " + error.message,
-      });
+    res.status(500).json({
+      error: "Failed to fetch limited offer products: " + error.message,
+    });
   }
 };
 
@@ -135,20 +133,35 @@ const addProduct = async (req, res) => {
     punchline,
     quantity,
     dosage,
+    featured, // New field
+    limitedOffer, // New field
+    discount, // New field
+    discountExpiry, // New field
   } = req.body;
 
   // Get uploaded image paths as an array
   const imageUrls = req.files.map((file) => file.path);
 
-  // Parse other fields
+  // Parse numerical fields
   const parsedPrice = parseFloat(price);
-  const precautionsArray = precautions.split(",");
+  const parsedDiscount = discount ? parseFloat(discount) : 0; // Default to 0 if no discount provided
+  const parsedDiscountExpiry = discountExpiry ? new Date(discountExpiry) : null; // Default to null if not provided
 
+  // Validate price format
   if (isNaN(parsedPrice)) {
     return res.status(400).json({ message: "Invalid price format" });
   }
 
+  // Validate discount format (if provided)
+  if (discount && isNaN(parsedDiscount)) {
+    return res.status(400).json({ message: "Invalid discount format" });
+  }
+
+  // Split precautions into an array
+  const precautionsArray = precautions ? precautions.split(",") : [];
+
   try {
+    // Check if the product already exists in the same category
     const existingProduct = await prisma.product.findFirst({
       where: { name, categoryId },
     });
@@ -156,22 +169,28 @@ const addProduct = async (req, res) => {
       return res.status(409).json({ message: "Product already exists" });
     }
 
+    // Create a new product
     const product = await prisma.product.create({
       data: {
         name,
         price: parsedPrice,
         indications,
         description,
-        inStock: inStock === "true",
+        inStock: inStock === "true", // Convert string to boolean
         categoryId,
         precautions: precautionsArray,
         punchline,
         quantity,
         dosage,
         imageUrls, // Store multiple image URLs
+        featured: featured === "true", // Convert string to boolean
+        limitedOffer: limitedOffer === "true", // Convert string to boolean
+        discount: parsedDiscount, // Parsed discount value
+        discountExpiry: parsedDiscountExpiry, // Parsed discount expiry
       },
     });
-    res.json(product);
+
+    res.status(201).json(product);
   } catch (error) {
     res.status(500).json({ error: "Failed to add product: " + error.message });
   }
@@ -204,6 +223,10 @@ const updateProduct = async (req, res) => {
     punchline,
     quantity,
     dosage,
+    featured, // New field
+    limitedOffer, // New field
+    discount, // New field
+    discountExpiry, // New field
   } = req.body;
 
   // Append new images to existing ones
@@ -217,7 +240,7 @@ const updateProduct = async (req, res) => {
         price: parseFloat(price),
         indications,
         description,
-        inStock: inStock === "true",
+        inStock: inStock === "true", // Convert string to boolean
         categoryId,
         precautions: Array.isArray(precautions)
           ? precautions
@@ -226,6 +249,10 @@ const updateProduct = async (req, res) => {
         quantity,
         dosage,
         imageUrls: { push: imageUrls }, // Append new images to existing ones
+        featured: featured === "true", // Convert string to boolean
+        limitedOffer: limitedOffer === "true", // Convert string to boolean
+        discount: discount ? parseFloat(discount) : 0, // Parse discount or default to 0
+        discountExpiry: discountExpiry ? new Date(discountExpiry) : null, // Parse discountExpiry or default to null
       },
     });
     res.json(product);
