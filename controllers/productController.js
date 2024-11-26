@@ -24,9 +24,13 @@ const getFilteredProducts = async (req, res) => {
   // Build a dynamic where clause based on provided filters
   let where = {};
 
+  // Handle multiple categories filtering
   if (categoryId) {
-    where.categoryId = categoryId;
+    const categoryIds = categoryId.split(","); // Assume categoryId is a comma-separated string
+    where.categoryId = { in: categoryIds };
   }
+
+  // Handle price range filtering
   if (minPrice || maxPrice) {
     where.price = {};
     if (minPrice) where.price.gte = parseFloat(minPrice);
