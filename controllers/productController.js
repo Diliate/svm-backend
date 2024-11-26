@@ -120,6 +120,29 @@ const getDiscountedProducts = async (req, res) => {
   }
 };
 
+// GET: PRODUCT DETAILS USING ID
+const getProductById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id },
+      include: {
+        category: true,
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch product: " + error.message });
+  }
+};
+
 // GET: SEARCH PRODUCTS
 const searchProducts = async (req, res) => {
   const { query } = req.query; // Capture the query string from the request
@@ -301,4 +324,5 @@ module.exports = {
   getLimitedOfferProducts,
   getDiscountedProducts,
   searchProducts,
+  getProductById,
 };
