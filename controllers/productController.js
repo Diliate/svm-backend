@@ -278,14 +278,19 @@ const updateProduct = async (req, res) => {
     punchline,
     quantity,
     dosage,
-    featured, // New field
-    limitedOffer, // New field
-    discount, // New field
-    discountExpiry, // New field
+    featured,
+    limitedOffer,
+    discount,
+    discountExpiry,
   } = req.body;
 
-  // Append new images to existing ones
-  const imageUrls = req.files.map((file) => file.path);
+  // Parse precautions to array
+  const parsedPrecautions = Array.isArray(precautions)
+    ? precautions
+    : precautions.split(",").map((item) => item.trim());
+
+  // Parse imageUrls from uploaded files
+  const imageUrls = req.files?.map((file) => file.path) || [];
 
   try {
     const product = await prisma.product.update({
@@ -295,26 +300,30 @@ const updateProduct = async (req, res) => {
         price: parseFloat(price),
         indications,
         description,
-        inStock: inStock === "true", // Convert string to boolean
+        inStock: inStock === "true",
         categoryId,
-        precautions: Array.isArray(precautions)
-          ? precautions
-          : precautions.split(","),
+        precautions: parsedPrecautions,
         punchline,
         quantity,
         dosage,
-        imageUrls: { push: imageUrls }, // Append new images to existing ones
-        featured: featured === "true", // Convert string to boolean
-        limitedOffer: limitedOffer === "true", // Convert string to boolean
-        discount: discount ? parseFloat(discount) : 0, // Parse discount or default to 0
-        discountExpiry: discountExpiry ? new Date(discountExpiry) : null, // Parse discountExpiry or default to null
+        imageUrls: imageUrls.length > 0 ? { push: imageUrls } : undefined,
+        featured: featured === "true",
+        limitedOffer: limitedOffer === "true",
+        discount: discount ? parseFloat(discount) : 0,
+        // Only set discountExpiry if it's valid
+        discountExpiry:
+          discountExpiry && !isNaN(new Date(discountExpiry))
+            ? new Date(discountExpiry)
+            : null,
       },
     });
+
     res.json(product);
   } catch (error) {
+    console.error("Error updating product:", error);
     res
       .status(500)
-      .json({ error: "Failed to update product: " + error.message });
+      .json({ error: `Failed to update product: ${error.message}` });
   }
 };
 
