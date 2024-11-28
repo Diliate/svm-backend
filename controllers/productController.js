@@ -150,12 +150,14 @@ const getProductById = async (req, res) => {
 // GET: SEARCH PRODUCTS
 const searchProducts = async (req, res) => {
   const { query } = req.query; // Capture the query string from the request
+
+  console.log("Search Query Received:", query); // Log incoming query
+
   if (!query) {
     return res.status(400).json({ message: "Query string is required" });
   }
 
   try {
-    // Use Prisma to find products with a partial match
     const products = await prisma.product.findMany({
       where: {
         name: {
@@ -165,13 +167,16 @@ const searchProducts = async (req, res) => {
       },
     });
 
+    console.log("Products Found:", products); // Log found products
+
     if (products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
 
     res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error in searchProducts:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

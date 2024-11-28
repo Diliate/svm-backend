@@ -11,10 +11,11 @@ router.get("/filtered", productController.getFilteredProducts);
 router.get("/featured", productController.getFeaturedProducts);
 router.get("/limited-offers", productController.getLimitedOfferProducts);
 router.get("/discounted", productController.getDiscountedProducts);
-router.get("/:id", productController.getProductById);
 
 // Get searched products
 router.get("/search", productController.searchProducts);
+
+router.get("/:id", productController.getProductById);
 
 // CRUD operations (ADD, UPDATE, DELETE PRODUCTS)
 router.post("/", upload.array("images", 5), productController.addProduct);
