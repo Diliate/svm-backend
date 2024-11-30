@@ -8,23 +8,24 @@ datasource db {
 }
 
 model Product {
-  id             String    @id @default(uuid())
+  id             String     @id @default(uuid())
   name           String
   price          Float
   indications    String
   description    String
   inStock        Boolean
-  category       Category  @relation(fields: [categoryId], references: [id])
+  category       Category   @relation(fields: [categoryId], references: [id])
   categoryId     String
   precautions    String[]
   punchline      String
   quantity       String
   dosage         String
   imageUrls      String[]
-  featured       Boolean   @default(false)
-  limitedOffer   Boolean   @default(false)
+  featured       Boolean    @default(false)
+  limitedOffer   Boolean    @default(false)
   discount       Float? // Store discount percentage (e.g., 10.0 for 10%)
   discountExpiry DateTime? // For time-sensitive discounts
+  cartItems      CartItem[]
 }
 
 model Category {
@@ -40,6 +41,7 @@ model User {
   password  String
   mobile    String? // Optional mobile number
   addresses Address[] // Relation to multiple addresses
+  carts     Cart[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -64,4 +66,24 @@ model Order {
   currency  String
   status    String
   createdAt DateTime @default(now())
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  cart      Cart     @relation(fields: [cartId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
