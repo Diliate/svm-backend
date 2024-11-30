@@ -97,8 +97,27 @@ const updateCartItem = async (req, res) => {
   }
 };
 
+// Remove product from cart
+const removeFromCart = async (req, res) => {
+  const { cartItemId } = req.body;
+
+  try {
+    await prisma.cartItem.delete({
+      where: { id: cartItemId },
+    });
+
+    res
+      .status(200)
+      .json({ message: "Product removed from cart successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to remove product from cart." });
+  }
+};
+
 module.exports = {
   addToCart,
   getUserCart,
   updateCartItem,
+  removeFromCart,
 };
