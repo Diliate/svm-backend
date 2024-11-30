@@ -49,6 +49,32 @@ const addToCart = async (req, res) => {
   }
 };
 
+// Get user cart
+const getUserCart = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const cart = await prisma.cart.findUnique({
+      where: { userId: parseInt(userId) },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
+    });
+
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found." });
+    }
+
+    res.status(200).json(cart);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch cart." });
+  }
+};
+
 module.exports = {
   addToCart,
+  getUserCart,
 };
