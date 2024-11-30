@@ -1,4 +1,4 @@
-const prisma = require("../db/prisma"); // Adjust path based on your project structure
+const prisma = require("../DB/db.config");
 
 // Get wishlist for a user
 const getWishlist = async (req, res) => {
