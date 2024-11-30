@@ -8,24 +8,25 @@ datasource db {
 }
 
 model Product {
-  id             String     @id @default(uuid())
+  id             String         @id @default(uuid())
   name           String
   price          Float
   indications    String
   description    String
   inStock        Boolean
-  category       Category   @relation(fields: [categoryId], references: [id])
+  category       Category       @relation(fields: [categoryId], references: [id])
   categoryId     String
   precautions    String[]
   punchline      String
   quantity       String
   dosage         String
   imageUrls      String[]
-  featured       Boolean    @default(false)
-  limitedOffer   Boolean    @default(false)
+  featured       Boolean        @default(false)
+  limitedOffer   Boolean        @default(false)
   discount       Float? // Store discount percentage (e.g., 10.0 for 10%)
   discountExpiry DateTime? // For time-sensitive discounts
   cartItems      CartItem[]
+  wishlistItems  WishlistItem[]
 }
 
 model Category {
@@ -35,15 +36,35 @@ model Category {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  mobile    String? // Optional mobile number
-  addresses Address[] // Relation to multiple addresses
-  cart      Cart?     @relation() // No `fields` or `references` on this side
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id         Int       @id @default(autoincrement())
+  name       String
+  email      String    @unique
+  password   String
+  mobile     String?
+  addresses  Address[]
+  cart       Cart?     @relation()
+  wishist    Wishlist?
+  wishlistId Int?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Wishlist {
+  id        Int            @id @default(autoincrement())
+  userId    Int            @unique
+  user      User           @relation(fields: [userId], references: [id])
+  items     WishlistItem[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
+  wishlistId Int // Link to the Wishlist model
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  productId  String // Link to the Product model
+  product    Product  @relation(fields: [productId], references: [id])
+  addedAt    DateTime @default(now())
 }
 
 model Address {
