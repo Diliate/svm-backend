@@ -74,7 +74,31 @@ const getUserCart = async (req, res) => {
   }
 };
 
+// Update cart item quantity
+const updateCartItem = async (req, res) => {
+  const { cartItemId, quantity } = req.body;
+
+  try {
+    if (quantity <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Quantity must be greater than 0." });
+    }
+
+    await prisma.cartItem.update({
+      where: { id: cartItemId },
+      data: { quantity },
+    });
+
+    res.status(200).json({ message: "Cart item updated successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to update cart item." });
+  }
+};
+
 module.exports = {
   addToCart,
   getUserCart,
+  updateCartItem,
 };
