@@ -8,9 +8,9 @@ const {
 
 const router = express.Router();
 
-router.post("/cart", addToCart);
-router.get("/cart/:userId", getUserCart);
-router.put("/cart/item", updateCartItem);
-router.delete("/cart/item", removeFromCart);
+router.post("/", addToCart);
+router.get("/:userId", getUserCart);
+router.put("/item", updateCartItem);
+router.delete("/item", removeFromCart);
 
 module.exports = router;

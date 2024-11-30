@@ -1,19 +1,28 @@
+// const prisma = require("../DB/db.config");
 const prisma = require("../DB/db.config");
-
 // Add product to cart
 const addToCart = async (req, res) => {
   const { userId, productId, quantity } = req.body;
 
   try {
-    // Find or create the cart for the user
+    if (!userId || !productId || !quantity || quantity <= 0) {
+      return res
+        .status(400)
+        .json({ error: "Invalid input. Ensure all fields are correct." });
+    }
+
+    const userIdInt = parseInt(userId);
+
+    // Fetch the cart directly using the unique userId
     let cart = await prisma.cart.findUnique({
-      where: { userId },
+      where: { userId: userIdInt },
       include: { items: true },
     });
 
+    // Create the cart if it doesn't exist
     if (!cart) {
       cart = await prisma.cart.create({
-        data: { userId },
+        data: { userId: userIdInt },
       });
     }
 
@@ -26,13 +35,13 @@ const addToCart = async (req, res) => {
     });
 
     if (existingItem) {
-      // Update the quantity of the existing item
+      // Update quantity if the item exists
       await prisma.cartItem.update({
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity },
       });
     } else {
-      // Add new product to cart
+      // Add a new item if it doesn't exist
       await prisma.cartItem.create({
         data: {
           cartId: cart.id,
@@ -44,7 +53,7 @@ const addToCart = async (req, res) => {
 
     res.status(200).json({ message: "Product added to cart successfully." });
   } catch (error) {
-    console.error(error);
+    console.error("Error in addToCart:", error);
     res.status(500).json({ error: "Failed to add product to cart." });
   }
 };
@@ -54,22 +63,25 @@ const getUserCart = async (req, res) => {
   const { userId } = req.params;
 
   try {
+    const userIdInt = parseInt(userId, 10);
+
+    // Fetch the cart using the unique userId
     const cart = await prisma.cart.findUnique({
-      where: { userId: parseInt(userId) },
+      where: { userId: userIdInt },
       include: {
         items: {
-          include: { product: true },
+          include: { product: true }, // Include product details for each cart item
         },
       },
     });
 
-    if (!cart) {
-      return res.status(404).json({ message: "Cart not found." });
+    if (!cart || !cart.items.length) {
+      return res.status(200).json({ message: "Cart is empty.", items: [] });
     }
 
     res.status(200).json(cart);
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching cart:", error);
     res.status(500).json({ error: "Failed to fetch cart." });
   }
 };

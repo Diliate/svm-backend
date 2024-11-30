@@ -41,7 +41,7 @@ model User {
   password  String
   mobile    String? // Optional mobile number
   addresses Address[] // Relation to multiple addresses
-  carts     Cart[]
+  cart      Cart?     @relation() // No `fields` or `references` on this side
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
@@ -58,20 +58,10 @@ model Address {
   updatedAt DateTime @updatedAt
 }
 
-model Order {
-  id        Int      @id @default(autoincrement())
-  orderId   String   @unique
-  receipt   String
-  amount    Int
-  currency  String
-  status    String
-  createdAt DateTime @default(now())
-}
-
 model Cart {
   id        Int        @id @default(autoincrement())
-  userId    Int
-  user      User       @relation(fields: [userId], references: [id])
+  userId    Int        @unique // Ensure one cart per user
+  user      User       @relation(fields: [userId], references: [id]) // Relation defined here
   items     CartItem[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -86,4 +76,14 @@ model CartItem {
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  orderId   String   @unique
+  receipt   String
+  amount    Int
+  currency  String
+  status    String
+  createdAt DateTime @default(now())
 }
