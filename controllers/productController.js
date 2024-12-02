@@ -11,7 +11,7 @@ const getAllProducts = async (req, res) => {
     if (products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -21,16 +21,13 @@ const getAllProducts = async (req, res) => {
 const getFilteredProducts = async (req, res) => {
   const { categoryId, minPrice, maxPrice } = req.query;
 
-  // Build a dynamic where clause based on provided filters
   let where = {};
 
-  // Handle multiple categories filtering
   if (categoryId) {
-    const categoryIds = categoryId.split(","); // Assume categoryId is a comma-separated string
+    const categoryIds = categoryId.split(",");
     where.categoryId = { in: categoryIds };
   }
 
-  // Handle price range filtering
   if (minPrice || maxPrice) {
     where.price = {};
     if (minPrice) where.price.gte = parseFloat(minPrice);
@@ -48,7 +45,7 @@ const getFilteredProducts = async (req, res) => {
     if (products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -65,23 +62,20 @@ const getFeaturedProducts = async (req, res) => {
     if (products.length === 0) {
       return res.status(404).json({ message: "No featured products found" });
     }
-
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch featured products: " + error.message });
+    res.status(500).json({ error: "Failed to fetch featured products." });
   }
 };
 
-// GET: GET LIMITED OFFER PRODUCTS
+// GET: LIMITED OFFER PRODUCTS
 const getLimitedOfferProducts = async (req, res) => {
   try {
     const currentDateTime = new Date();
     const products = await prisma.product.findMany({
       where: {
         limitedOffer: true,
-        discountExpiry: { gte: currentDateTime }, // Ensure the discount is valid
+        discountExpiry: { gte: currentDateTime },
         inStock: true,
       },
       include: { category: true },
@@ -92,12 +86,9 @@ const getLimitedOfferProducts = async (req, res) => {
         .status(404)
         .json({ message: "No limited offer products found" });
     }
-
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to fetch limited offer products: " + error.message,
-    });
+    res.status(500).json({ error: "Failed to fetch limited offer products." });
   }
 };
 
@@ -106,7 +97,7 @@ const getDiscountedProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
       where: {
-        discount: { gt: 0 }, // Products with a discount greater than 0
+        discount: { gt: 0 },
         inStock: true,
       },
       include: { category: true },
@@ -115,43 +106,44 @@ const getDiscountedProducts = async (req, res) => {
     if (products.length === 0) {
       return res.status(404).json({ message: "No discounted products found" });
     }
-
-    res.json(products);
+    res.status(200).json(products);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch discounted products: " + error.message });
+    res.status(500).json({ error: "Failed to fetch discounted products." });
   }
 };
 
-// GET: PRODUCT DETAILS USING ID
+// GET: PRODUCT DETAILS USING ID WITH FAVOURITE STATUS
 const getProductById = async (req, res) => {
   const { id } = req.params;
+  const { userId } = req.query; // Capture userId from query params
+
   try {
     const product = await prisma.product.findUnique({
       where: { id },
-      include: {
-        category: true,
-      },
+      include: { category: true },
     });
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json(product);
+    let isFavourite = false;
+    if (userId) {
+      const wishlistItem = await prisma.wishlistItem.findFirst({
+        where: { productId: id, wishlist: { userId: parseInt(userId, 10) } },
+      });
+      isFavourite = !!wishlistItem;
+    }
+
+    res.status(200).json({ ...product, favourite: isFavourite });
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch product: " + error.message });
+    res.status(500).json({ error: "Failed to fetch product details." });
   }
 };
 
 // GET: SEARCH PRODUCTS
 const searchProducts = async (req, res) => {
-  const { query } = req.query; // Capture the query string from the request
-
-  console.log("Search Query Received:", query); // Log incoming query
+  const { query } = req.query;
 
   if (!query) {
     return res.status(400).json({ message: "Query string is required" });
@@ -161,22 +153,18 @@ const searchProducts = async (req, res) => {
     const products = await prisma.product.findMany({
       where: {
         name: {
-          contains: query, // Partial match for the product name
-          mode: "insensitive", // Case-insensitive search
+          contains: query,
+          mode: "insensitive",
         },
       },
     });
 
-    console.log("Products Found:", products); // Log found products
-
     if (products.length === 0) {
       return res.status(404).json({ message: "No products found" });
     }
-
     res.status(200).json(products);
   } catch (error) {
-    console.error("Error in searchProducts:", error.message);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Failed to search products." });
   }
 };
 
@@ -193,66 +181,37 @@ const addProduct = async (req, res) => {
     punchline,
     quantity,
     dosage,
-    featured, // New field
-    limitedOffer, // New field
-    discount, // New field
-    discountExpiry, // New field
+    featured,
+    limitedOffer,
+    discount,
+    discountExpiry,
   } = req.body;
 
-  // Get uploaded image paths as an array
   const imageUrls = req.files.map((file) => file.path);
 
-  // Parse numerical fields
-  const parsedPrice = parseFloat(price);
-  const parsedDiscount = discount ? parseFloat(discount) : 0; // Default to 0 if no discount provided
-  const parsedDiscountExpiry = discountExpiry ? new Date(discountExpiry) : null; // Default to null if not provided
-
-  // Validate price format
-  if (isNaN(parsedPrice)) {
-    return res.status(400).json({ message: "Invalid price format" });
-  }
-
-  // Validate discount format (if provided)
-  if (discount && isNaN(parsedDiscount)) {
-    return res.status(400).json({ message: "Invalid discount format" });
-  }
-
-  // Split precautions into an array
-  const precautionsArray = precautions ? precautions.split(",") : [];
-
   try {
-    // Check if the product already exists in the same category
-    const existingProduct = await prisma.product.findFirst({
-      where: { name, categoryId },
-    });
-    if (existingProduct) {
-      return res.status(409).json({ message: "Product already exists" });
-    }
-
-    // Create a new product
     const product = await prisma.product.create({
       data: {
         name,
-        price: parsedPrice,
+        price: parseFloat(price),
         indications,
         description,
-        inStock: inStock === "true", // Convert string to boolean
+        inStock: inStock === "true",
         categoryId,
-        precautions: precautionsArray,
+        precautions: precautions.split(","),
         punchline,
         quantity,
         dosage,
-        imageUrls, // Store multiple image URLs
-        featured: featured === "true", // Convert string to boolean
-        limitedOffer: limitedOffer === "true", // Convert string to boolean
-        discount: parsedDiscount, // Parsed discount value
-        discountExpiry: parsedDiscountExpiry, // Parsed discount expiry
+        imageUrls,
+        featured: featured === "true",
+        limitedOffer: limitedOffer === "true",
+        discount: discount ? parseFloat(discount) : 0,
+        discountExpiry: discountExpiry ? new Date(discountExpiry) : null,
       },
     });
-
     res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ error: "Failed to add product: " + error.message });
+    res.status(500).json({ error: "Failed to add product." });
   }
 };
 
@@ -260,12 +219,10 @@ const addProduct = async (req, res) => {
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
-    const product = await prisma.product.delete({
-      where: { id },
-    });
-    res.json(product);
+    const product = await prisma.product.delete({ where: { id } });
+    res.status(200).json(product);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Failed to delete product." });
   }
 };
 
@@ -289,12 +246,6 @@ const updateProduct = async (req, res) => {
     discountExpiry,
   } = req.body;
 
-  // Parse precautions to array
-  const parsedPrecautions = Array.isArray(precautions)
-    ? precautions
-    : precautions.split(",").map((item) => item.trim());
-
-  // Parse imageUrls from uploaded files
   const imageUrls = req.files?.map((file) => file.path) || [];
 
   try {
@@ -307,7 +258,7 @@ const updateProduct = async (req, res) => {
         description,
         inStock: inStock === "true",
         categoryId,
-        precautions: parsedPrecautions,
+        precautions: precautions.split(","),
         punchline,
         quantity,
         dosage,
@@ -315,32 +266,25 @@ const updateProduct = async (req, res) => {
         featured: featured === "true",
         limitedOffer: limitedOffer === "true",
         discount: discount ? parseFloat(discount) : 0,
-        // Only set discountExpiry if it's valid
-        discountExpiry:
-          discountExpiry && !isNaN(new Date(discountExpiry))
-            ? new Date(discountExpiry)
-            : null,
+        discountExpiry: discountExpiry ? new Date(discountExpiry) : null,
       },
     });
 
-    res.json(product);
+    res.status(200).json(product);
   } catch (error) {
-    console.error("Error updating product:", error);
-    res
-      .status(500)
-      .json({ error: `Failed to update product: ${error.message}` });
+    res.status(500).json({ error: "Failed to update product." });
   }
 };
 
 module.exports = {
-  addProduct,
-  deleteProduct,
-  updateProduct,
   getAllProducts,
   getFilteredProducts,
   getFeaturedProducts,
   getLimitedOfferProducts,
   getDiscountedProducts,
-  searchProducts,
   getProductById,
+  searchProducts,
+  addProduct,
+  deleteProduct,
+  updateProduct,
 };

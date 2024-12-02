@@ -4,22 +4,23 @@ const productController = require("../controllers/productController");
 const upload = require("../middleware/uploadMiddleware");
 
 // General product routes (FETCH ALL & FILTERED PRODUCTS)
-router.get("/", productController.getAllProducts);
-router.get("/filtered", productController.getFilteredProducts);
+router.get("/", productController.getAllProducts); // Fetch all products
+router.get("/filtered", productController.getFilteredProducts); // Fetch filtered products
 
-// Specific product type routes (FETCH FEATURED & DISCOUNTED PRODUTS)
-router.get("/featured", productController.getFeaturedProducts);
-router.get("/limited-offers", productController.getLimitedOfferProducts);
-router.get("/discounted", productController.getDiscountedProducts);
+// Specific product type routes (FETCH FEATURED, DISCOUNTED, & LIMITED OFFER PRODUCTS)
+router.get("/featured", productController.getFeaturedProducts); // Fetch featured products
+router.get("/limited-offers", productController.getLimitedOfferProducts); // Fetch limited offer products
+router.get("/discounted", productController.getDiscountedProducts); // Fetch discounted products
 
-// Get searched products
-router.get("/search", productController.searchProducts);
+// Search products
+router.get("/search", productController.searchProducts); // Search products by query
 
+// Fetch product details by ID (supports `userId` query for favourite status)
 router.get("/:id", productController.getProductById);
 
 // CRUD operations (ADD, UPDATE, DELETE PRODUCTS)
-router.post("/", upload.array("images", 5), productController.addProduct);
-router.put("/:id", upload.array("images", 5), productController.updateProduct);
-router.delete("/:id", productController.deleteProduct);
+router.post("/", upload.array("images", 5), productController.addProduct); // Add a new product
+router.put("/:id", upload.array("images", 5), productController.updateProduct); // Update a product
+router.delete("/:id", productController.deleteProduct); // Delete a product
 
 module.exports = router;
