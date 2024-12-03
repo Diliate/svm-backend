@@ -20,6 +20,25 @@ const addRating = async (req, res) => {
   }
 };
 
+// Get all ratings for a product
+const getProductRatings = async (req, res) => {
+  const { productId } = req.params;
+
+  try {
+    const ratings = await prisma.rating.findMany({
+      where: { productId },
+      include: {
+        user: { select: { name: true } }, // Include user name
+      },
+    });
+    res.status(200).json(ratings);
+  } catch (error) {
+    console.error("Error fetching product ratings:", error);
+    res.status(500).json({ error: "Failed to fetch product ratings." });
+  }
+};
+
 module.exports = {
   addRating,
+  getProductRatings,
 };
