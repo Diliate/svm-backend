@@ -4,6 +4,11 @@ const prisma = require("../DB/db.config");
 const addRating = async (req, res) => {
   const { productId, userId, rating, feedback } = req.body;
 
+  if (!productId || !userId || !rating) {
+    return res.status(400).json({
+      error: "Missing required fields",
+    });
+  }
   try {
     const newRating = await prisma.rating.create({
       data: {
