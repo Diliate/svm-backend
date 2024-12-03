@@ -5,49 +5,57 @@ const addToCart = async (req, res) => {
   const { userId, productId, quantity } = req.body;
 
   try {
+    // Input validation
     if (!userId || !productId || !quantity || quantity <= 0) {
-      return res
-        .status(400)
-        .json({ error: "Invalid input. Ensure all fields are correct." });
+      console.error("Invalid Input:", { userId, productId, quantity });
+      return res.status(400).json({
+        error: "Invalid input. Ensure all fields are correct.",
+      });
     }
 
     const userIdInt = parseInt(userId);
 
-    // Fetch the cart directly using the unique userId
+    // Check if user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: userIdInt },
+    });
+    if (!userExists) {
+      console.error("User does not exist:", { userId });
+      return res.status(400).json({ error: "User not found." });
+    }
+
+    // Check if product exists
+    const productExists = await prisma.product.findUnique({
+      where: { id: productId },
+    });
+    if (!productExists) {
+      console.error("Product does not exist:", { productId });
+      return res.status(400).json({ error: "Product not found." });
+    }
+
+    // Fetch or create cart
     let cart = await prisma.cart.findUnique({
       where: { userId: userIdInt },
       include: { items: true },
     });
 
-    // Create the cart if it doesn't exist
     if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId: userIdInt },
-      });
+      cart = await prisma.cart.create({ data: { userId: userIdInt } });
     }
 
-    // Check if the product already exists in the cart
+    // Check if item already exists in cart
     const existingItem = await prisma.cartItem.findFirst({
-      where: {
-        cartId: cart.id,
-        productId,
-      },
+      where: { cartId: cart.id, productId },
     });
 
     if (existingItem) {
-      // Update quantity if the item exists
       await prisma.cartItem.update({
         where: { id: existingItem.id },
         data: { quantity: existingItem.quantity + quantity },
       });
     } else {
-      // Add a new item if it doesn't exist
       await prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          productId,
-          quantity,
-        },
+        data: { cartId: cart.id, productId, quantity },
       });
     }
 
