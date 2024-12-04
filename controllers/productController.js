@@ -1,19 +1,35 @@
 const prisma = require("../DB/db.config");
 
-// GET: ALL PRODUCTS
+// GET: ALL PRODUCTS WITH PAGINATION
 const getAllProducts = async (req, res) => {
+  const { page = 1, limit = 6 } = req.query; // Default page=1, limit=6
+  const skip = (page - 1) * parseInt(limit);
+
   try {
+    // Fetch paginated products
     const products = await prisma.product.findMany({
-      include: {
-        category: true,
-      },
+      skip,
+      take: parseInt(limit),
+      include: { category: true },
+      orderBy: { id: "asc" }, // Ensure consistent ordering
     });
-    if (products.length === 0) {
-      return res.status(404).json({ message: "No products found" });
-    }
-    res.status(200).json(products);
+
+    // Fetch total product count (WITHOUT OFFSET)
+    const total = await prisma.product.count();
+
+    console.log(
+      `Page: ${page}, Products Returned: ${products.length}, Total Products: ${total}`
+    );
+
+    res.status(200).json({
+      products,
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit),
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ error: "Failed to fetch products." });
   }
 };
 
