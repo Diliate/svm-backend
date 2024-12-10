@@ -10,24 +10,24 @@ const prisma = require("../DB/db.config");
 
 // Registration Controller
 const register = async (req, res) => {
-  // Handle validation results
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(`Validation errors: ${JSON.stringify(errors.array())}`);
     return res.status(400).json({ errors: errors.array() });
   }
 
-  let { name, email, password } = req.body;
+  let { name, email, password, phone } = req.body;
 
   // Normalize email to lowercase
   email = email.toLowerCase();
 
   try {
-    // Check if user already exists
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       console.warn(`Registration attempt with existing email: ${email}`);
-      return res.status(400).json({ message: "User already exists." });
+      return res
+        .status(400)
+        .json({ message: "User with this email already exists." });
     }
 
     // Hash the password
@@ -35,12 +35,10 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user
-    const user = await createUser(name, email, hashedPassword);
+    const user = await createUser(name, email, hashedPassword, phone);
 
     // Generate JWT
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
     res.status(201).json({
       message: "User registered successfully.",
@@ -49,6 +47,7 @@ const register = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
       },
     });
   } catch (error) {
@@ -65,7 +64,7 @@ const login = async (req, res) => {
     // Find the user by email
     const user = await prisma.user.findUnique({
       where: { email },
-      include: { addresses: true }, // Include addresses
+      include: { addresses: true },
     });
 
     if (!user) {
@@ -77,9 +76,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
     res.status(200).json({
       message: "Logged in successfully.",
@@ -93,19 +90,18 @@ const login = async (req, res) => {
 
 // Update User Details Controller
 const updateUserDetails = async (req, res) => {
-  const { id } = req.user; // Extract user ID from the token (from `protect` middleware)
-  const { name, email } = req.body;
+  const { id } = req.user;
+  const { name, email, phone } = req.body;
 
   try {
-    // Validate input fields if necessary
-    if (!name || !email) {
+    if (!name || !email || !phone) {
       return res
         .status(400)
-        .json({ message: "Name and email are required fields." });
+        .json({ message: "Name, email and phone no. are required fields." });
     }
 
     // Update user details
-    const updatedUser = await updateUser(id, { name, email });
+    const updatedUser = await updateUser(id, { name, email, phone });
 
     res.status(200).json({
       message: "User details updated successfully.",
@@ -122,7 +118,7 @@ const getUserWithAddresses = async (req, res) => {
     const { id } = req.user;
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { addresses: true }, // Include addresses
+      include: { addresses: true },
     });
 
     res.status(200).json(user);

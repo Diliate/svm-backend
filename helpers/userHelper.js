@@ -1,12 +1,13 @@
 const prisma = require("../DB/db.config");
 
 // Create a new user
-const createUser = async (name, email, password = null) => {
+const createUser = async (name, email, password = null, phone) => {
   const user = await prisma.user.create({
     data: {
       name,
       email,
       password,
+      phone,
     },
   });
   return user;
@@ -24,7 +25,7 @@ const findUserByEmail = async (email) => {
 const findUserById = async (id) => {
   const user = await prisma.user.findUnique({
     where: { id },
-    include: { addresses: true }, // Include the related addresses
+    include: { addresses: true },
   });
   return user;
 };
