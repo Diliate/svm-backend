@@ -1,5 +1,3 @@
-// routes/authRoutes.js
-
 const express = require("express");
 const {
   register,
@@ -8,35 +6,20 @@ const {
   getUserWithAddresses,
 } = require("../controllers/authController");
 const { body } = require("express-validator");
-const { protect } = require("../middleware/authMiddleware");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // Registration Route with Validation
-router.post(
-  "/register",
-  [
-    body("name", "Name is required").not().isEmpty(),
-    body("email", "Please include a valid email").isEmail(),
-    body("password", "Password must be at least 6 characters long").isLength({
-      min: 6,
-    }),
-  ],
-  register
-);
+router.post("/register", isAuthenticated, register);
 
 // Login Route with Validation
-router.post(
-  "/login",
-  [
-    body("email", "Please include a valid email").isEmail(),
-    body("password", "Password is required").exists(),
-  ],
-  login
-);
+router.post("/login", isAuthenticated, login);
 
-router.put("/update", protect, updateUserDetails);
+// Update User Details Route
+router.put("/update", isAuthenticated, updateUserDetails);
 
-router.get("/user", protect, getUserWithAddresses);
+// Get User with Addresses Route
+router.get("/user", isAuthenticated, getUserWithAddresses);
 
 module.exports = router;

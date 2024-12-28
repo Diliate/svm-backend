@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const path = require("path");
+const cookieParser = require("cookie-parser");
 
 dotenv.config();
 
@@ -43,6 +44,8 @@ app.use(cors());
 
 // Body parser to parse JSON bodies
 app.use(express.json());
+
+app.use(cookieParser());
 
 // Serve static files from the 'uploads' directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

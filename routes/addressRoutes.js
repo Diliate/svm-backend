@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 const {
   addAddress,
   removeAddress,
@@ -9,12 +9,12 @@ const {
 const router = express.Router();
 
 // Add a new address
-router.post("/", protect, addAddress);
+router.post("/", isAuthenticated, addAddress);
 
 // Remove an address
-router.delete("/:addressId", protect, removeAddress);
+router.delete("/:addressId", isAuthenticated, removeAddress);
 
 // Get all addresses for a user
-router.get("/", protect, getAddresses);
+router.get("/", isAuthenticated, getAddresses);
 
 module.exports = router;
