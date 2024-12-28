@@ -89,9 +89,9 @@ const prisma = require("../DB/db.config");
 // };
 
 const register = async (req, res) => {
-  const { name, email, password, phone } = req.body;
+  const { name, email, password, mobile } = req.body;
 
-  if (!name || !email || !password || !phone) {
+  if (!name || !email || !password || !mobile) {
     return res.status(400).json({
       success: false,
       message: "All fields Required",
@@ -115,23 +115,18 @@ const register = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await createUser(name, email, hashedPassword, phone);
+    const user = await createUser(name, email, hashedPassword, mobile);
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
-
-    res
-      .status(201)
-      .cookie("token", token, { httpOnly: true, sameSite: "strict" })
-      .json({
-        success: true,
-        message: "Account created successfully.",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-        },
-      });
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully.",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        mobile: user.mobile,
+      },
+    });
   } catch (error) {
     console.log("Error registering user: ", error);
     res.status(500).json({ message: "Server error" });
@@ -186,17 +181,17 @@ const logout = async (_, res) => {
 // Update User Details Controller
 const updateUserDetails = async (req, res) => {
   const { id } = req.user;
-  const { name, email, phone } = req.body;
+  const { name, email, mobile } = req.body;
 
   try {
-    if (!name || !email || !phone) {
+    if (!name || !email || !mobile) {
       return res
         .status(400)
         .json({ message: "Name, email and phone no. are required fields." });
     }
 
     // Update user details
-    const updatedUser = await updateUser(id, { name, email, phone });
+    const updatedUser = await updateUser(id, { name, email, mobile });
 
     res.status(200).json({
       message: "User details updated successfully.",

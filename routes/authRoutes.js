@@ -6,16 +6,15 @@ const {
   getUserWithAddresses,
   logout,
 } = require("../controllers/authController");
-const { body } = require("express-validator");
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // Registration Route with Validation
-router.post("/register", isAuthenticated, register);
+router.post("/register", register);
 
 // Login Route with Validation
-router.post("/login", isAuthenticated, login);
+router.post("/login", login);
 
 // Update User Details Route
 router.put("/update", isAuthenticated, updateUserDetails);
@@ -23,6 +22,6 @@ router.put("/update", isAuthenticated, updateUserDetails);
 // Get User with Addresses Route
 router.get("/user", isAuthenticated, getUserWithAddresses);
 
-router.get("/logout", logout);
+router.post("/logout", logout);
 
 module.exports = router;
