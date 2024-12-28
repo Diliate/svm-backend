@@ -172,6 +172,17 @@ const login = async (req, res) => {
   }
 };
 
+const logout = async (_, res) => {
+  try {
+    return res.status(200).cookie("token", "").json({
+      success: true,
+      message: "User logout successfully",
+    });
+  } catch (error) {
+    console.log("Error loggin out: ", error);
+  }
+};
+
 // Update User Details Controller
 const updateUserDetails = async (req, res) => {
   const { id } = req.user;
@@ -214,6 +225,7 @@ const getUserWithAddresses = async (req, res) => {
 module.exports = {
   register,
   login,
+  logout,
   updateUserDetails,
   getUserWithAddresses,
 };
