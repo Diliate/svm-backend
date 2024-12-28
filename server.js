@@ -40,7 +40,12 @@ app.use(morgan("dev"));
 // app.use(limiter);
 
 // Enable CORS with default settings
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 // Body parser to parse JSON bodies
 app.use(express.json());

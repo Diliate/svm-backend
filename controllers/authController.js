@@ -129,7 +129,10 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.log("Error registering user: ", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
@@ -154,27 +157,42 @@ const login = async (req, res) => {
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
 
-    res
+    return res
       .status(200)
       .cookie("token", token, { httpOnly: true, sameSite: "strict" })
       .json({
+        success: true,
         message: "Logged in successfully.",
         user,
       });
   } catch (error) {
     console.log("Error logging User: ", error);
-    res.status(500).json({ message: `Server error: ${error.message}` });
+    res.status(500).json({
+      success: false,
+      message: `Server error: ${error.message}`,
+    });
   }
 };
 
 const logout = async (_, res) => {
   try {
-    return res.status(200).cookie("token", "").json({
-      success: true,
-      message: "User logout successfully",
-    });
+    return res
+      .status(200)
+      .clearCookie("token", {
+        httpOnly: true,
+        sameSite: "strict",
+        path: "/",
+      })
+      .json({
+        success: true,
+        message: "User logged out successfully",
+      });
   } catch (error) {
     console.log("Error loggin out: ", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
 
