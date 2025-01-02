@@ -1,31 +1,54 @@
 const prisma = require("../DB/db.config");
+const { isValidDate } = require("../helpers/userHelper");
 
 // GET: ALL PRODUCTS WITH PAGINATION
-const getAllProducts = async (req, res) => {
-  const { page = 1, limit = 6 } = req.query; // Default page=1, limit=6
-  const skip = (page - 1) * parseInt(limit);
+// const getAllProducts = async (req, res) => {
+//   const { page = 1, limit = 6 } = req.query; // Default page=1, limit=6
+//   const skip = (page - 1) * parseInt(limit);
 
+//   try {
+//     // Fetch paginated products
+//     const products = await prisma.product.findMany({
+//       skip,
+//       take: parseInt(limit),
+//       include: { category: true },
+//       orderBy: { id: "asc" }, // Ensure consistent ordering
+//     });
+
+//     // Fetch total product count (WITHOUT OFFSET)
+//     const total = await prisma.product.count();
+
+//     console.log(
+//       `Page: ${page}, Products Returned: ${products.length}, Total Products: ${total}`
+//     );
+
+//     res.status(200).json({
+//       products,
+//       total,
+//       page: parseInt(page),
+//       pages: Math.ceil(total / limit),
+//     });
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+//     res.status(500).json({ error: "Failed to fetch products." });
+//   }
+// };
+const getAllProducts = async (req, res) => {
   try {
-    // Fetch paginated products
+    // Fetch all products
     const products = await prisma.product.findMany({
-      skip,
-      take: parseInt(limit),
-      include: { category: true },
+      include: { category: true }, // Include related category data
       orderBy: { id: "asc" }, // Ensure consistent ordering
     });
 
-    // Fetch total product count (WITHOUT OFFSET)
+    // Fetch total product count
     const total = await prisma.product.count();
 
-    console.log(
-      `Page: ${page}, Products Returned: ${products.length}, Total Products: ${total}`
-    );
+    console.log(`Total Products: ${total}`);
 
     res.status(200).json({
       products,
       total,
-      page: parseInt(page),
-      pages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -192,6 +215,54 @@ const searchProducts = async (req, res) => {
 };
 
 // POST: ADD PRODUCT
+// const addProduct = async (req, res) => {
+//   const {
+//     name,
+//     price,
+//     indications,
+//     description,
+//     inStock,
+//     categoryId,
+//     precautions,
+//     punchline,
+//     quantity,
+//     dosage,
+//     featured,
+//     limitedOffer,
+//     discount,
+//     discountExpiry,
+//   } = req.body;
+
+//   const imageUrls = req.files.map((file) => file.path);
+
+//   try {
+//     const product = await prisma.product.create({
+//       data: {
+//         name,
+//         price: parseFloat(price),
+//         indications,
+//         description,
+//         inStock: inStock === "true",
+//         categoryId,
+//         precautions: precautions.split(","),
+//         punchline,
+//         quantity,
+//         dosage,
+//         imageUrls,
+//         featured: featured === "true",
+//         limitedOffer: limitedOffer === "true",
+//         discount: discount ? parseFloat(discount) : 0,
+//         discountExpiry: discountExpiry ? new Date(discountExpiry) : null,
+//       },
+//     });
+//     res.status(201).json(product);
+//   } catch (error) {
+//     console.error("Error adding product:", error);
+//     res
+//       .status(500)
+//       .json({ error: "Failed to add product.", details: error.message });
+//   }
+// };
 const addProduct = async (req, res) => {
   const {
     name,
@@ -229,12 +300,17 @@ const addProduct = async (req, res) => {
         featured: featured === "true",
         limitedOffer: limitedOffer === "true",
         discount: discount ? parseFloat(discount) : 0,
-        discountExpiry: discountExpiry ? new Date(discountExpiry) : null,
+        discountExpiry: isValidDate(discountExpiry)
+          ? new Date(discountExpiry)
+          : null,
       },
     });
     res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ error: "Failed to add product." });
+    console.error("Error adding product:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to add product.", details: error.message });
   }
 };
 

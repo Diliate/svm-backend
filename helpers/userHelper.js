@@ -39,9 +39,15 @@ const updateUser = async (id, data) => {
   return user;
 };
 
+const isValidDate = (dateString) => {
+  const date = new Date(dateString);
+  return date instanceof Date && !isNaN(date);
+};
+
 module.exports = {
   createUser,
   findUserByEmail,
   findUserById,
   updateUser,
+  isValidDate,
 };
