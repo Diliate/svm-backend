@@ -17,7 +17,7 @@ const addressRoutes = require("./routes/addressRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const ratingRoutes = require("./routes/ratingRoutes");
-// const razorpayRoutes = require("./routes/razorpayRoutes");
+const razorpayRoutes = require("./routes/razorpayRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -83,7 +83,7 @@ app.use("/api/addresses", addressRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/ratings", ratingRoutes);
-// app.use("/api/razorpay", razorpayRoutes);
+app.use("/api/razorpay", razorpayRoutes);
 
 // Home route
 app.get("/", (req, res) => {

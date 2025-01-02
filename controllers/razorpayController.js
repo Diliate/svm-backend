@@ -1,44 +1,23 @@
 const razorpay = require("../services/razorpay");
 const crypto = require("crypto");
-
+const prisma = require("../DB/db.config");
 /**
  * Create a new Razorpay order
  * POST /api/razorpay/create-order
  */
-exports.createOrder = async (req, res) => {
+const createOrder = async (req, res) => {
   try {
-    const { amount, currency, receipt } = req.body;
+    const { amount, currency, receipt, userId } = req.body;
 
     // Input Validation
     if (
       amount === undefined ||
       currency === undefined ||
-      receipt === undefined
+      receipt === undefined ||
+      userId === undefined
     ) {
       return res.status(400).json({
-        error: "Missing required fields: amount, currency, receipt",
-      });
-    }
-
-    // Validate amount
-    if (!Number.isInteger(amount) || amount <= 0) {
-      return res.status(400).json({
-        error:
-          "Amount must be a positive integer in the smallest currency unit (e.g., paise)",
-      });
-    }
-
-    // Validate currency
-    if (typeof currency !== "string" || currency.length !== 3) {
-      return res.status(400).json({
-        error: "Currency must be a 3-letter code (e.g., 'INR')",
-      });
-    }
-
-    // Validate receipt
-    if (typeof receipt !== "string" || receipt.trim() === "") {
-      return res.status(400).json({
-        error: "Receipt must be a non-empty string",
+        error: "Missing required fields: amount, currency, receipt, userId",
       });
     }
 
@@ -51,8 +30,19 @@ exports.createOrder = async (req, res) => {
     // Create order with Razorpay
     const order = await razorpay.orders.create(options);
 
+    const newOrder = await prisma.order.create({
+      data: {
+        orderId: order.id,
+        userId,
+        receipt,
+        amount: amount,
+        currency: currency,
+        status: "CREATED",
+      },
+    });
+
     // Respond with order details
-    res.status(201).json(order);
+    res.status(201).json({ order, newOrder });
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
 
@@ -69,38 +59,7 @@ exports.createOrder = async (req, res) => {
  * Verify Razorpay payment signature
  * POST /api/razorpay/verify-payment
  */
-exports.verifyPayment = (req, res) => {
-  try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-      req.body;
 
-    // Input Validation
-    if (
-      typeof razorpay_order_id !== "string" ||
-      typeof razorpay_payment_id !== "string" ||
-      typeof razorpay_signature !== "string"
-    ) {
-      return res.status(400).json({
-        error:
-          "Missing required fields: razorpay_order_id, razorpay_payment_id, razorpay_signature",
-      });
-    }
-
-    // Generate expected signature
-    const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(sign)
-      .digest("hex");
-
-    // Compare signatures
-    if (expectedSignature === razorpay_signature) {
-      res.json({ status: "success", message: "Payment verified successfully" });
-    } else {
-      res.status(400).json({ status: "failure", message: "Invalid signature" });
-    }
-  } catch (error) {
-    console.error("Error verifying Razorpay payment:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+module.exports = {
+  createOrder,
 };
