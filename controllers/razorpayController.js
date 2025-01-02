@@ -59,7 +59,59 @@ const createOrder = async (req, res) => {
  * Verify Razorpay payment signature
  * POST /api/razorpay/verify-payment
  */
+const verifyPayment = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      req.body;
+
+    // Input Validation
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
+        error: "Missing required fields.",
+      });
+    }
+
+    // Generate expected signature
+    const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(sign)
+      .digest("hex");
+
+    // Compare signatures
+    if (expectedSignature === razorpay_signature) {
+      await prisma.order.update({
+        where: {
+          orderId: razorpay_order_id,
+        },
+        data: {
+          status: "PAID",
+        },
+      });
+      return res.json({
+        status: "success",
+        message: "Payment verified successfully",
+      });
+    } else {
+      await prisma.order.update({
+        where: {
+          orderId: razorpay_order_id,
+        },
+        data: {
+          status: "FAILED",
+        },
+      });
+      return res
+        .status(400)
+        .json({ status: "failure", message: "Invalid signature" });
+    }
+  } catch (error) {
+    console.error("Error verifying Razorpay payment:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 module.exports = {
   createOrder,
+  verifyPayment,
 };
