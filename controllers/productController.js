@@ -365,7 +365,9 @@ const updateProduct = async (req, res) => {
         featured: featured === "true",
         limitedOffer: limitedOffer === "true",
         discount: discount ? parseFloat(discount) : 0,
-        discountExpiry: discountExpiry ? new Date(discountExpiry) : null,
+        discountExpiry: isValidDate(discountExpiry)
+          ? new Date(discountExpiry)
+          : null,
       },
     });
 
