@@ -12,9 +12,6 @@ router.get("/featured", productController.getFeaturedProducts); // Fetch feature
 router.get("/limited-offers", productController.getLimitedOfferProducts); // Fetch limited offer products
 router.get("/discounted", productController.getDiscountedProducts); // Fetch discounted products
 
-// Search products
-router.get("/search", productController.searchProducts); // Search products by query
-
 // Fetch product details by ID (supports `userId` query for favourite status)
 router.get("/:id", productController.getProductById);
 

@@ -74,9 +74,37 @@ const updateCategory = async (req, res) => {
   }
 };
 
+// GET: SEARCH PRODUCTS
+const searchCategory = async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ message: "Query string is required" });
+  }
+
+  try {
+    const products = await prisma.category.findMany({
+      where: {
+        name: {
+          contains: query,
+          mode: "insensitive",
+        },
+      },
+    });
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to search products." });
+  }
+};
+
 module.exports = {
   addCategory,
   deleteCategory,
   updateCategory,
   getAllCategories,
+  searchCategory,
 };

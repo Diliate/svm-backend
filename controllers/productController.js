@@ -187,33 +187,6 @@ const getProductById = async (req, res) => {
   }
 };
 
-// GET: SEARCH PRODUCTS
-const searchProducts = async (req, res) => {
-  const { query } = req.query;
-
-  if (!query) {
-    return res.status(400).json({ message: "Query string is required" });
-  }
-
-  try {
-    const products = await prisma.product.findMany({
-      where: {
-        name: {
-          contains: query,
-          mode: "insensitive",
-        },
-      },
-    });
-
-    if (products.length === 0) {
-      return res.status(404).json({ message: "No products found" });
-    }
-    res.status(200).json(products);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to search products." });
-  }
-};
-
 // POST: ADD PRODUCT
 // const addProduct = async (req, res) => {
 //   const {
@@ -384,7 +357,6 @@ module.exports = {
   getLimitedOfferProducts,
   getDiscountedProducts,
   getProductById,
-  searchProducts,
   addProduct,
   deleteProduct,
   updateProduct,
