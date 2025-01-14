@@ -18,6 +18,7 @@ const wishlistRoutes = require("./routes/wishlistRoutes");
 const ratingRoutes = require("./routes/ratingRoutes");
 const razorpayRoutes = require("./routes/razorpayRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const shiprocketRoutes = require("./routes/shiprocketRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +54,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/ratings", ratingRoutes);
 app.use("/api/razorpay", razorpayRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/shiprocket", shiprocketRoutes);
 
 // Home route
 app.get("/", (req, res) => {

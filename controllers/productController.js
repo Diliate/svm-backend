@@ -350,6 +350,64 @@ const updateProduct = async (req, res) => {
   }
 };
 
+// GET: PRODUCTS BY CATEGORY ID
+// const getProductsByCategory = async (req, res) => {
+//   const { categoryId } = req.params; // get the category ID from the URL parameter
+
+//   try {
+//     const products = await prisma.product.findMany({
+//       where: { categoryId: categoryId },
+//       include: { category: true }, // Optionally include category details if needed
+//     });
+
+//     if (products.length === 0) {
+//       return res
+//         .status(404)
+//         .json({ message: "No products found for this category" });
+//     }
+
+//     res.status(200).json(products);
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .json({ error: "Failed to fetch products for the category." });
+//   }
+// };
+
+// GET: PRODUCTS BY CATEGORY
+const getProductsByCategory = async (req, res) => {
+  const { categoryId } = req.params; // Extract categoryId from URL parameters
+
+  // Validate categoryId
+  if (!categoryId) {
+    return res.status(400).json({ message: "Category ID is required." });
+  }
+
+  try {
+    // Fetch products that belong to the specified category
+    const products = await prisma.product.findMany({
+      where: { categoryId: categoryId },
+      include: { category: true }, // Include category details if needed
+      orderBy: { id: "asc" }, // Optional: Order products by ID
+    });
+
+    // If no products are found, return a 404 response
+    if (products.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No products found for this category." });
+    }
+
+    // Respond with the fetched products
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("Error fetching products by category:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch products for the category." });
+  }
+};
+
 module.exports = {
   getAllProducts,
   getFilteredProducts,
@@ -357,6 +415,7 @@ module.exports = {
   getLimitedOfferProducts,
   getDiscountedProducts,
   getProductById,
+  getProductsByCategory,
   addProduct,
   deleteProduct,
   updateProduct,

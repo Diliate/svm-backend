@@ -80,19 +80,37 @@ const cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
 
-    // Mark order as cancelled
+    // Fetch the order to get the shipment ID
+    const order = await prisma.order.findUnique({
+      where: { id: Number(orderId) },
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    if (order.status === "CANCELLED") {
+      return res.status(400).json({ error: "Order is already cancelled" });
+    }
+
+    // Update order status to CANCELLED
     const updatedOrder = await prisma.order.update({
       where: { id: Number(orderId) },
       data: { status: "CANCELLED" },
     });
 
+    // If there's a Shiprocket shipment, cancel it
+    if (order.shiprocketShipmentId) {
+      await cancelShiprocketShipment(
+        { body: { shipmentId: order.shiprocketShipmentId } },
+        res
+      );
+    }
+
     return res.json({ success: true, order: updatedOrder });
   } catch (error) {
     console.error("Error cancelling order:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to cancel order",
-    });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

@@ -2,6 +2,9 @@ const razorpay = require("../services/razorpay");
 const crypto = require("crypto");
 const prisma = require("../DB/db.config");
 
+// 1) Import the Shiprocket service
+const { createShiprocketOrder } = require("../services/shiprocketService");
+
 /**
  * Create a new Razorpay order
  * POST /api/razorpay/create-order
@@ -10,7 +13,6 @@ const createOrder = async (req, res) => {
   try {
     const { amount, currency, receipt, userId } = req.body;
 
-    // Input Validation
     if (
       amount === undefined ||
       currency === undefined ||
@@ -36,7 +38,7 @@ const createOrder = async (req, res) => {
         orderId: order.id, // same as Razorpay order.id
         userId,
         receipt,
-        amount, // in paise if you choose
+        amount, // in paise
         currency,
         status: "CREATED",
       },
@@ -71,7 +73,10 @@ const verifyPayment = async (req, res) => {
       receipt,
     } = req.body;
 
-    // Step 1: Validate Razorpay signature
+    // ------------------------------
+    // TEMPORARILY DISABLED SIGNATURE CHECK:
+    // ------------------------------
+    // // Step 1: Validate Razorpay signature
     const sign = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -84,8 +89,7 @@ const verifyPayment = async (req, res) => {
         .json({ status: "failure", message: "Invalid signature" });
     }
 
-    // Step 2: Payment is verified — update the existing order to "PAID"
-    //         and optionally add the line items now.
+    // Step 2: Payment is verified => update the existing order to "PAID"
     const updatedOrder = await prisma.order.update({
       where: { orderId: razorpay_order_id }, // The unique field in your schema
       data: {
@@ -102,10 +106,88 @@ const verifyPayment = async (req, res) => {
       include: { items: true },
     });
 
+    // -----------------------------------------------
+    // SHIPROCKET INTEGRATION BELOW
+    // -----------------------------------------------
+
+    // (a) Fetch the user info (for shipping details)
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    // (b) Fetch an address record for that user
+    const address = await prisma.address.findFirst({
+      where: { userId },
+    });
+
+    // We'll split that into first + last:
+    const fullName = user?.name || "Mohd Fahad";
+    const [firstName, ...rest] = fullName.split(" ");
+    const lastName = rest.length ? rest.join(" ") : "User"; // if only one name, fallback
+
+    // Build the phone so it's always 10 digits:
+    const phone = user?.mobile || "9667073396"; // ensure it's 10 digits
+
+    // Now set the pickup_location to "Home" (the address nickname in your screenshot)
+    const shippingData = {
+      order_id: updatedOrder.orderId,
+      order_date: new Date().toISOString(),
+      pickup_location:
+        "325 Batla House, Okhla, Near Hari Masjid, South Delhi, Delhi, India, 110025", // EXACT nickname from Shiprocket Dashboard
+
+      // Instead of billing_customer_name, we do:
+      billing_first_name: firstName,
+      billing_last_name: lastName,
+
+      // The rest of the address
+      billing_customer_name: user?.name || "Mohd Fahad",
+      billing_address:
+        address?.area || "325 Batla House, Okhla, Near Hari Masjid",
+      billing_city: address?.city || "South Delhi",
+      billing_pincode: address?.zipCode || "110025",
+      billing_state: address?.state || "Delhi",
+      billing_country: "India",
+      billing_email: user?.email || "fahadmohammad312@example.com",
+      billing_phone: phone,
+
+      shipping_is_billing: true,
+
+      order_items: cartItems.map((item) => ({
+        name: "Product 6", // or real product name
+        sku: item.productId,
+        units: item.quantity,
+        selling_price: item.price,
+        discount: 0,
+        tax: 0,
+        hsn: 0,
+      })),
+
+      payment_method: "Prepaid",
+      sub_total: updatedOrder.amount,
+      length: 10,
+      breadth: 10,
+      height: 10,
+      weight: 1,
+    };
+
+    // (d) Create the order on Shiprocket
+    const shiprocketRes = await createShiprocketOrder(shippingData);
+
+    // (e) Optionally store the Shiprocket references in your DB
+    await prisma.order.update({
+      where: { id: updatedOrder.id },
+      data: {
+        shiprocketOrderId: shiprocketRes?.order_id || null,
+        shiprocketShipmentId: shiprocketRes?.shipment_id || null,
+      },
+    });
+
+    // Return success response
     return res.json({
       status: "success",
-      message: "Payment verified successfully",
+      message: "Payment verified successfully & Shiprocket order created",
       order: updatedOrder,
+      shiprocket: shiprocketRes,
     });
   } catch (error) {
     console.error("Error verifying Razorpay payment:", error);
