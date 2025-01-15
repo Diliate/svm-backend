@@ -5,23 +5,36 @@ const {
   updateUserDetails,
   getUserWithAddresses,
   logout,
+  requestResetOTP,
+  resetPasswordWithOTP,
+  changePassword,
 } = require("../controllers/authController");
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Registration Route with Validation
+// POST: Registration Route with Validation
 router.post("/register", register);
 
-// Login Route with Validation
+// POST: Login Route with Validation
 router.post("/login", login);
 
-// Update User Details Route
+// UPDATE: User Details Route
 router.put("/update", isAuthenticated, updateUserDetails);
 
-// Get User with Addresses Route
+// GET: User with Addresses Route
 router.get("/user", isAuthenticated, getUserWithAddresses);
 
+// POST:
 router.post("/logout", logout);
+
+// POST: Change password through current password
+router.post("/change-password", isAuthenticated, changePassword);
+
+// Request Reset OTP Route
+router.post("/request-reset-otp", requestResetOTP);
+
+// Reset Password with OTP Route
+router.post("/reset-password-with-otp", resetPasswordWithOTP);
 
 module.exports = router;
