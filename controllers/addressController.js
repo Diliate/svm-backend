@@ -1,15 +1,27 @@
+// controllers/addressController.js
 const prisma = require("../DB/db.config");
 
 // Add an address
 const addAddress = async (req, res) => {
-  const { id: userId } = req.user; // User ID from the protect middleware
+  // Defensive check for req.user
+  if (!req.user || !req.user.id) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: User information missing." });
+  }
+
+  const { id: userId } = req.user; // User ID from the authentication middleware
   const { area, city, state, zipCode } = req.body;
 
   try {
+    // Validate input fields
     if (!area || !city || !state || !zipCode) {
-      return res.status(400).json({ message: "All fields are required." });
+      return res.status(400).json({
+        message: "All fields (area, city, state, zipCode) are required.",
+      });
     }
 
+    // Create a new address associated with the user
     const address = await prisma.address.create({
       data: { area, city, state, zipCode, userId },
     });
@@ -23,10 +35,18 @@ const addAddress = async (req, res) => {
 
 // Remove an address
 const removeAddress = async (req, res) => {
+  // Defensive check for req.user
+  if (!req.user || !req.user.id) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: User information missing." });
+  }
+
   const { addressId } = req.params;
-  const { id: userId } = req.user; // User ID from the protect middleware
+  const { id: userId } = req.user; // User ID from the authentication middleware
 
   try {
+    // Find the address to ensure it exists and belongs to the user
     const address = await prisma.address.findUnique({
       where: { id: parseInt(addressId) },
     });
@@ -36,11 +56,12 @@ const removeAddress = async (req, res) => {
     }
 
     if (address.userId !== userId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to delete this address." });
+      return res.status(403).json({
+        message: "Forbidden: You are not authorized to delete this address.",
+      });
     }
 
+    // Delete the address
     await prisma.address.delete({ where: { id: parseInt(addressId) } });
     res.status(200).json({ message: "Address removed successfully." });
   } catch (error) {
@@ -51,14 +72,22 @@ const removeAddress = async (req, res) => {
 
 // Get all addresses for a user
 const getAddresses = async (req, res) => {
+  // Defensive check for req.user
+  if (!req.user || !req.user.id) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized: User information missing." });
+  }
+
   const { id: userId } = req.user;
 
   try {
+    // Fetch all addresses associated with the user
     const addresses = await prisma.address.findMany({
       where: { userId },
     });
 
-    res.status(200).json(addresses);
+    res.status(200).json({ addresses });
   } catch (error) {
     console.error("Error fetching addresses:", error);
     res.status(500).json({ message: `Server error: ${error.message}` });

@@ -1,123 +1,126 @@
 // controllers/shiprocketController.js
+
 const {
   createShiprocketOrder,
-  requestShipmentPickup,
   trackShipment,
   cancelShipment,
+  getAllPickupLocations,
 } = require("../services/shiprocketService");
 const prisma = require("../DB/db.config");
 
 /**
- * Request a shipment pickup
- * POST /api/shiprocket/request-pickup
+ * Create a Shiprocket order
+ * @param {Object} orderData - The payload for Shiprocket order creation
+ * @param {Object} res - Express response object
+ * @returns {Object} - Contains order_id and shipment_id
  */
-const requestPickup = async (req, res) => {
+const handleCreateShiprocketOrder = async (orderData, res) => {
   try {
-    const { shipmentId } = req.body;
+    console.log("Creating Shiprocket Order with payload:", orderData);
 
-    if (!shipmentId) {
-      return res
-        .status(400)
-        .json({ error: "Missing required field: shipmentId" });
+    // Create Shiprocket order via service
+    const shiprocketRes = await createShiprocketOrder(orderData);
+
+    console.log("Shiprocket Order Creation Response:", shiprocketRes);
+
+    // Ensure Shiprocket responded with order and shipment IDs
+    const { order_id, shipment_id } = shiprocketRes;
+
+    if (!order_id || !shipment_id) {
+      console.log("Incomplete Shiprocket response:", shiprocketRes);
+      throw new Error("Incomplete Shiprocket response.");
     }
 
-    const pickupResponse = await requestShipmentPickup(shipmentId);
-    return res.status(200).json({ success: true, pickup: pickupResponse });
+    // Convert IDs to strings
+    const shiprocketOrderId = order_id.toString();
+    const shiprocketShipmentId = shipment_id.toString();
+
+    // Update the corresponding Order in the DB with Shiprocket IDs
+    const updatedOrder = await prisma.order.update({
+      where: { orderId: orderData.order_id },
+      data: {
+        shiprocketOrderId, // String
+        shiprocketShipmentId, // String
+      },
+    });
+
+    console.log("Order updated with Shiprocket IDs:", updatedOrder);
+
+    return {
+      shiprocketOrderId,
+      shiprocketShipmentId,
+    };
   } catch (error) {
-    console.error("Error requesting shipment pickup:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error in handleCreateShiprocketOrder:", error.message);
+    throw new Error("Shiprocket Order Creation Failed");
   }
 };
 
 /**
- * Track a shipment
- * GET /api/shiprocket/track-shipment/:shipmentId
+ * Track a Shiprocket shipment
+ * GET /api/shiprocket/track/:shipmentId
  */
-const trackShipmentStatus = async (req, res) => {
+const handleTrackShipment = async (req, res) => {
   try {
     const { shipmentId } = req.params;
 
     if (!shipmentId) {
-      return res
-        .status(400)
-        .json({ error: "Missing required parameter: shipmentId" });
+      return res.status(400).json({ error: "Shipment ID is required." });
     }
 
     const trackingInfo = await trackShipment(shipmentId);
-    return res.status(200).json({ success: true, tracking: trackingInfo });
+
+    return res.json({
+      status: "success",
+      tracking: trackingInfo,
+    });
   } catch (error) {
-    console.error("Error tracking shipment:", error);
+    console.error("Error tracking Shiprocket shipment:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 /**
- * Handle Shiprocket webhooks
- * POST /api/shiprocket/webhook
+ * Cancel a Shiprocket shipment
+ * POST /api/shiprocket/cancel
  */
-const handleWebhook = async (req, res) => {
-  try {
-    const event = req.body;
-
-    // Optional: Validate webhook signature if Shiprocket provides one
-    // const isValid = validateShiprocketSignature(req.headers, req.body);
-    // if (!isValid) return res.status(400).json({ error: "Invalid signature" });
-
-    // Handle different event types
-    switch (event.event) {
-      case "shipment.status.update":
-        const { shipment_id, status } = event.data;
-        await prisma.order.updateMany({
-          where: { shiprocketShipmentId: shipment_id },
-          data: { status: status.toUpperCase() }, // Adjust status as per your schema
-        });
-        break;
-      // Handle other event types as needed
-      default:
-        console.warn("Unhandled Shiprocket event type:", event.event);
-    }
-
-    return res.status(200).json({ received: true });
-  } catch (error) {
-    console.error("Error handling Shiprocket webhook:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-/**
- * Cancel a shipment
- * POST /api/shiprocket/cancel-shipment
- */
-const cancelShiprocketShipment = async (req, res) => {
+const handleCancelShipment = async (req, res) => {
   try {
     const { shipmentId } = req.body;
 
     if (!shipmentId) {
       return res
         .status(400)
-        .json({ error: "Missing required field: shipmentId" });
+        .json({ error: "Missing shipmentId in request body." });
     }
 
-    const cancelResponse = await cancelShipment(shipmentId);
+    const cancellationResponse = await cancelShipment(shipmentId);
 
-    // Optionally, update your database to reflect the cancellation
-    await prisma.order.updateMany({
+    // Update order status if needed
+    const order = await prisma.order.findUnique({
       where: { shiprocketShipmentId: shipmentId },
-      data: { status: "CANCELLED" },
     });
 
-    return res
-      .status(200)
-      .json({ success: true, cancellation: cancelResponse });
+    if (order) {
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: "CANCELLED" },
+      });
+    }
+
+    return res.json({
+      status: "success",
+      message: "Shipment cancelled successfully",
+      cancellation: cancellationResponse,
+    });
   } catch (error) {
-    console.error("Error cancelling shipment:", error);
+    console.error("Error cancelling Shiprocket shipment:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
 module.exports = {
-  requestPickup,
-  trackShipmentStatus,
-  handleWebhook,
-  cancelShiprocketShipment,
+  handleCreateShiprocketOrder,
+  handleTrackShipment,
+  handleCancelShipment,
 };

@@ -114,8 +114,35 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+const getOrderDetails = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await prisma.order.findUnique({
+      where: { orderId: orderId },
+      include: {
+        items: {
+          include: {
+            product: true, // Assuming you have a relation to the product
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    return res.json({ success: true, order });
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   createOrderRecord,
   getUserOrders,
   cancelOrder,
+  getOrderDetails,
 };

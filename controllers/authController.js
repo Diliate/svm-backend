@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { createUser, updateUser } = require("../helpers/userHelper");
 const { generateOTP, sendResetEmail } = require("../services/emailService");
+const { validatePassword } = require("../utils/validation");
 const prisma = require("../DB/db.config");
 
 const register = async (req, res) => {
@@ -11,6 +12,15 @@ const register = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "All fields Required",
+    });
+  }
+
+  // Password validation
+  if (!validatePassword(password)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Password must be at least 6 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character.",
     });
   }
 
@@ -153,7 +163,8 @@ const getUserWithAddresses = async (req, res) => {
 
 // Controller to change password by providing current password
 const changePassword = async (req, res) => {
-  const userId = req.user.id; // Assuming middleware sets req.user
+  // Access userId from req.user.id
+  const userId = req.user.id;
   const { currentPassword, newPassword } = req.body;
 
   // Validate inputs
@@ -161,6 +172,15 @@ const changePassword = async (req, res) => {
     return res.status(400).json({
       success: false,
       message: "Current password and new password are required.",
+    });
+  }
+
+  // Password validation
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "New password must be at least 6 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character.",
     });
   }
 
@@ -264,6 +284,15 @@ const resetPasswordWithOTP = async (req, res) => {
     return res
       .status(400)
       .json({ success: false, message: "All fields are required." });
+  }
+
+  // Password validation
+  if (!validatePassword(newPassword)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "New password must be at least 6 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character.",
+    });
   }
 
   try {

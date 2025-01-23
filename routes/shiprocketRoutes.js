@@ -1,24 +1,20 @@
 // routes/shiprocketRoutes.js
+
 const express = require("express");
+const router = express.Router();
 const {
-  requestPickup,
-  trackShipmentStatus,
-  handleWebhook,
-  cancelShiprocketShipment,
+  handleCreateShiprocketOrder,
+  handleTrackShipment,
+  handleCancelShipment,
 } = require("../controllers/shiprocketController");
 
-const router = express.Router();
+// Create a Shiprocket order
+router.post("/create-order", handleCreateShiprocketOrder);
 
-// POST /api/shiprocket/request-pickup
-router.post("/request-pickup", requestPickup);
+// Track a Shiprocket shipment
+router.get("/track/:shipmentId", handleTrackShipment);
 
-// GET /api/shiprocket/track-shipment/:shipmentId
-router.get("/track-shipment/:shipmentId", trackShipmentStatus);
-
-// POST /api/shiprocket/webhook
-router.post("/webhook", handleWebhook);
-
-// POST /api/shiprocket/cancel-shipment
-router.post("/cancel-shipment", cancelShiprocketShipment);
+// Cancel a Shiprocket shipment
+router.post("/cancel", handleCancelShipment);
 
 module.exports = router;

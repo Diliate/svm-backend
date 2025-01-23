@@ -135,9 +135,43 @@ const removeFromCart = async (req, res) => {
   }
 };
 
+// clear cart
+const clearCart = async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required." });
+    }
+
+    const userIdInt = parseInt(userId, 10);
+
+    // Check if cart exists
+    const cart = await prisma.cart.findUnique({
+      where: { userId: userIdInt },
+      include: { items: true },
+    });
+
+    if (!cart) {
+      return res.status(200).json({ message: "Cart is already empty." });
+    }
+
+    // Delete all cart items
+    await prisma.cartItem.deleteMany({
+      where: { cartId: cart.id },
+    });
+
+    res.status(200).json({ message: "Cart cleared successfully." });
+  } catch (error) {
+    console.error("Error in clearCart:", error);
+    res.status(500).json({ error: "Failed to clear the cart." });
+  }
+};
+
 module.exports = {
   addToCart,
   getUserCart,
   updateCartItem,
   removeFromCart,
+  clearCart,
 };

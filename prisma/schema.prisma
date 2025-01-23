@@ -24,7 +24,7 @@ model Product {
   featured       Boolean        @default(false)
   limitedOffer   Boolean        @default(false)
   discount       Float? // Store discount percentage (e.g., 10.0 for 10%)
-  discountExpiry DateTime? // For time-sensitive discounts
+  discountExpiry DateTime?
   cartItems      CartItem[]
   wishlistItems  WishlistItem[]
   ratings        Rating[]
@@ -49,8 +49,8 @@ model User {
   wishlist        Wishlist?
   wishlistId      Int?
   ratings         Rating[]
-  resetOtp        String? // Field to store the OTP
-  resetOtpExpires DateTime? // Field to store the OTP expiration time
+  resetOtp        String?
+  resetOtpExpires DateTime?
   role            Role      @default(USER)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

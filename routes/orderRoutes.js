@@ -6,15 +6,19 @@ const {
   createOrderRecord,
   getUserOrders,
   cancelOrder,
+  getOrderDetails,
 } = require("../controllers/orderController");
 
 // POST /api/orders => create a new order record (e.g., after Razorpay payment verification)
 router.post("/", createOrderRecord);
 
-// GET /api/orders/:userId => fetch all orders for a user
-router.get("/:userId", getUserOrders);
+// GET /api/orders/user/:userId => fetch all orders for a user
+router.get("/user/:userId", getUserOrders);
 
-// PATCH or POST /api/orders/:orderId/cancel => cancel an order (optional)
+// PATCH /api/orders/:orderId/cancel => cancel an order
 router.patch("/:orderId/cancel", cancelOrder);
+
+// GET /api/orders/:orderId => get order details by orderId (simplified route)
+router.get("/:orderId", getOrderDetails);
 
 module.exports = router;
