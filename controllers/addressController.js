@@ -1,6 +1,8 @@
 // controllers/addressController.js
 const prisma = require("../DB/db.config");
 
+const ALLOWED_ADDRESS_TYPES = ["HOME", "OFFICE", "OTHER"];
+
 // Add an address
 const addAddress = async (req, res) => {
   // Defensive check for req.user
@@ -17,14 +19,22 @@ const addAddress = async (req, res) => {
     // Validate input fields
     if (!area || !city || !state || !zipCode || !type) {
       return res.status(400).json({
-        message:
-          "All fields (area, city, state, zipCode and type) are required.",
+        message: "All fields (area, city, state, zipCode, type) are required.",
+      });
+    }
+
+    // Validate address type
+    if (!ALLOWED_ADDRESS_TYPES.includes(type.toUpperCase())) {
+      return res.status(400).json({
+        message: `Invalid address type. Allowed types are: ${ALLOWED_ADDRESS_TYPES.join(
+          ", "
+        )}.`,
       });
     }
 
     // Create a new address associated with the user
     const address = await prisma.address.create({
-      data: { area, city, state, zipCode, type, userId },
+      data: { area, city, state, zipCode, userId, type: type.toUpperCase() },
     });
 
     res.status(201).json({ message: "Address added successfully.", address });
@@ -86,6 +96,16 @@ const getAddresses = async (req, res) => {
     // Fetch all addresses associated with the user
     const addresses = await prisma.address.findMany({
       where: { userId },
+      select: {
+        id: true,
+        type: true,
+        area: true,
+        city: true,
+        state: true,
+        zipCode: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     res.status(200).json({ addresses });

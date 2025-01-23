@@ -12,7 +12,7 @@ const createOrderRecord = async (req, res) => {
     } = req.body;
 
     // Create the order in the DB
-    // We set `status = "PAID"` here, assuming you're calling this AFTER successful payment verification.
+    // We set status = "PAID" here, assuming you're calling this AFTER successful payment verification.
     const newOrder = await prisma.order.create({
       data: {
         orderId: razorpay_order_id,
@@ -48,13 +48,39 @@ const createOrderRecord = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { filter } = req.query; // 'month', 'week', 'year'
+
+    let startDate, endDate;
+
+    const now = new Date();
+    if (filter === "month") {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    } else if (filter === "week") {
+      const firstDayOfWeek = now.getDate() - now.getDay(); // Sunday
+      startDate = new Date(now.setDate(firstDayOfWeek));
+      endDate = new Date(now.setDate(firstDayOfWeek + 6));
+    } else if (filter === "year") {
+      startDate = new Date(now.getFullYear(), 0, 1);
+      endDate = new Date(now.getFullYear(), 11, 31);
+    }
+
+    const whereCondition = {
+      userId: Number(userId),
+      ...(filter && {
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
+      }),
+    };
 
     const orders = await prisma.order.findMany({
-      where: { userId: Number(userId) },
+      where: whereCondition,
       include: {
         items: {
           include: {
-            product: true, // so you can display product details
+            product: true,
           },
         },
       },
@@ -117,6 +143,7 @@ const cancelOrder = async (req, res) => {
 const getOrderDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
+    // const userId = req.user.id;
 
     const order = await prisma.order.findUnique({
       where: { orderId: orderId },
@@ -126,12 +153,17 @@ const getOrderDetails = async (req, res) => {
             product: true, // Assuming you have a relation to the product
           },
         },
+        shippingAddress: true,
       },
     });
 
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
     }
+
+    // if (order.userId !== userId) {
+    //   return res.status(403).json({ error: "Access denied to this order." });
+    // }
 
     return res.json({ success: true, order });
   } catch (error) {

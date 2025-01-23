@@ -83,6 +83,7 @@ const verifyPayment = async (req, res) => {
       breadth,
       height,
       weight,
+      addressId,
     } = req.body;
 
     // Log the necessary fields for debugging (exclude sensitive info)
@@ -121,7 +122,8 @@ const verifyPayment = async (req, res) => {
       !length ||
       !breadth ||
       !height ||
-      !weight
+      !weight ||
+      !addressId
     ) {
       return res
         .status(400)
@@ -148,6 +150,18 @@ const verifyPayment = async (req, res) => {
     }
 
     // Step 2: Payment is verified => update the existing order to "PAID"
+    // Fetch the selected shipping address from the database
+    const shippingAddress = await prisma.address.findUnique({
+      where: { id: addressId },
+    });
+
+    if (!shippingAddress) {
+      console.log("Shipping address not found.");
+      return res
+        .status(404)
+        .json({ status: "failure", message: "Shipping address not found." });
+    }
+    // Update the order with status "PAID" and associate shipping address
     const updatedOrder = await prisma.order.update({
       where: { orderId: razorpay_order_id },
       data: {
@@ -159,8 +173,11 @@ const verifyPayment = async (req, res) => {
             price: item.price,
           })),
         },
+        shippingAddress: {
+          connect: { id: addressId }, // Associate existing shipping address
+        },
       },
-      include: { items: true },
+      include: { items: true, shippingAddress: true },
     });
 
     console.log("Order updated to PAID:", updatedOrder);

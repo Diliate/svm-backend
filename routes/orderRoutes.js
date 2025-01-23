@@ -8,6 +8,9 @@ const {
   cancelOrder,
   getOrderDetails,
 } = require("../controllers/orderController");
+// const { isAuthenticated } = require("../middleware/authMiddleware");
+
+// router.use(isAuthenticated);
 
 // POST /api/orders => create a new order record (e.g., after Razorpay payment verification)
 router.post("/", createOrderRecord);
