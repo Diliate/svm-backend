@@ -11,19 +11,20 @@ const addAddress = async (req, res) => {
   }
 
   const { id: userId } = req.user; // User ID from the authentication middleware
-  const { area, city, state, zipCode } = req.body;
+  const { area, city, state, zipCode, type } = req.body;
 
   try {
     // Validate input fields
-    if (!area || !city || !state || !zipCode) {
+    if (!area || !city || !state || !zipCode || !type) {
       return res.status(400).json({
-        message: "All fields (area, city, state, zipCode) are required.",
+        message:
+          "All fields (area, city, state, zipCode and type) are required.",
       });
     }
 
     // Create a new address associated with the user
     const address = await prisma.address.create({
-      data: { area, city, state, zipCode, userId },
+      data: { area, city, state, zipCode, type, userId },
     });
 
     res.status(201).json({ message: "Address added successfully.", address });
