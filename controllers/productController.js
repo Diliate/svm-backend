@@ -1,5 +1,6 @@
 const prisma = require("../DB/db.config");
 const { isValidDate } = require("../helpers/userHelper");
+const path = require("path");
 
 // GET: ALL PRODUCTS WITH PAGINATION
 // const getAllProducts = async (req, res) => {
@@ -254,7 +255,9 @@ const addProduct = async (req, res) => {
     discountExpiry,
   } = req.body;
 
-  const imageUrls = req.files.map((file) => file.path);
+  const imageUrls = req.files.map(
+    (file) => `http://localhost:5000/uploads/${path.basename(file.path)}`
+  );
 
   try {
     const product = await prisma.product.create({
