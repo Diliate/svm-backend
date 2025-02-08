@@ -1,5 +1,6 @@
+// routes/addressRoutes.js
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 const {
   addAddress,
   removeAddress,
@@ -8,13 +9,16 @@ const {
 
 const router = express.Router();
 
+// Apply 'isAuthenticated' middleware to all routes in this router
+router.use(isAuthenticated);
+
 // Add a new address
-router.post("/", protect, addAddress);
+router.post("/", addAddress);
 
 // Remove an address
-router.delete("/:addressId", protect, removeAddress);
+router.delete("/:addressId", removeAddress);
 
 // Get all addresses for a user
-router.get("/", protect, getAddresses);
+router.get("/", getAddresses);
 
 module.exports = router;

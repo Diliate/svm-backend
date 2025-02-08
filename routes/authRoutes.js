@@ -1,42 +1,40 @@
-// routes/authRoutes.js
-
 const express = require("express");
 const {
   register,
   login,
   updateUserDetails,
   getUserWithAddresses,
+  logout,
+  requestResetOTP,
+  resetPasswordWithOTP,
+  changePassword,
 } = require("../controllers/authController");
-const { body } = require("express-validator");
-const { protect } = require("../middleware/authMiddleware");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-// Registration Route with Validation
-router.post(
-  "/register",
-  [
-    body("name", "Name is required").not().isEmpty(),
-    body("email", "Please include a valid email").isEmail(),
-    body("password", "Password must be at least 6 characters long").isLength({
-      min: 6,
-    }),
-  ],
-  register
-);
+// POST: Registration Route with Validation
+router.post("/register", register);
 
-// Login Route with Validation
-router.post(
-  "/login",
-  [
-    body("email", "Please include a valid email").isEmail(),
-    body("password", "Password is required").exists(),
-  ],
-  login
-);
+// POST: Login Route with Validation
+router.post("/login", login);
 
-router.put("/update", protect, updateUserDetails);
+// UPDATE: User Details Route
+router.put("/update", isAuthenticated, updateUserDetails);
 
-router.get("/user", protect, getUserWithAddresses);
+// GET: User with Addresses Route
+router.get("/user", isAuthenticated, getUserWithAddresses);
+
+// POST:
+router.post("/logout", logout);
+
+// POST: Change password through current password
+router.post("/change-password", isAuthenticated, changePassword);
+
+// Request Reset OTP Route
+router.post("/request-reset-otp", requestResetOTP);
+
+// Reset Password with OTP Route
+router.post("/reset-password-with-otp", resetPasswordWithOTP);
 
 module.exports = router;

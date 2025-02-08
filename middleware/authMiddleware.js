@@ -1,44 +1,49 @@
 const jwt = require("jsonwebtoken");
-const { findUserById } = require("../helpers/userHelper");
 
-const protect = async (req, res, next) => {
-  let token;
-
-  // Extract token from the Authorization header
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
-
-  if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Not authorized, no token provided." });
-  }
-
+const isAuthenticated = async (req, res, next) => {
   try {
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Log the incoming request method
+    console.log(`Incoming Request Method: ${req.method}`);
 
-    // Fetch the user associated with the token
-    const user = await findUserById(decoded.id);
-
-    if (!user) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized, user not found." });
+    // Bypass OPTIONS requests
+    if (req.method === "OPTIONS") {
+      console.log("Bypassing authentication for OPTIONS request.");
+      return next();
     }
 
-    // Attach user to the request
-    req.user = user;
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      console.log("Authentication failed: No token provided.");
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    // Verify and decode the token
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded JWT Payload:", decode); // Debugging line
+
+    if (!decode) {
+      console.log("Authentication failed: Invalid token.");
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+
+    // Adjust based on the actual payload
+    req.user = { id: decode.userId || decode.id };
+    console.log(`Authenticated User ID: ${req.user.id}`);
 
     next();
   } catch (error) {
-    console.error("Authorization error:", error);
-    return res.status(401).json({ message: "Not authorized, invalid token." });
+    console.error("Error in authentication middleware:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
   }
 };
 
-module.exports = { protect };
+module.exports = { isAuthenticated };
