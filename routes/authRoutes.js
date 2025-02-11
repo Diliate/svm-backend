@@ -9,7 +9,7 @@ const {
   resetPasswordWithOTP,
   changePassword,
 } = require("../controllers/authController");
-// const { isAuthenticated } = require("../middleware/authMiddleware");
+const { isAuthenticated } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -20,16 +20,16 @@ router.post("/register", register);
 router.post("/login", login);
 
 // UPDATE: User Details Route
-router.put("/update", updateUserDetails);
+router.put("/update", isAuthenticated, updateUserDetails);
 
 // GET: User with Addresses Route
-router.get("/user", getUserWithAddresses);
+router.get("/user", isAuthenticated, getUserWithAddresses);
 
 // POST:
 router.post("/logout", logout);
 
 // POST: Change password through current password
-router.post("/change-password", changePassword);
+router.post("/change-password", isAuthenticated, changePassword);
 
 // Request Reset OTP Route
 router.post("/request-reset-otp", requestResetOTP);

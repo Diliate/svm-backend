@@ -10,7 +10,7 @@ const {
 const router = express.Router();
 
 // Apply 'isAuthenticated' middleware to all routes in this router
-// router.use(isAuthenticated);
+router.use(isAuthenticated);
 
 // Add a new address
 router.post("/", addAddress);
