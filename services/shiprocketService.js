@@ -120,7 +120,7 @@ async function trackShipment(shipmentId) {
   try {
     const token = await getShiprocketToken();
     const response = await axios.get(
-      `${SHIPROCKET_BASE_URL}/courier/track/shipment/${shipmentId}`,
+      `${SHIPROCKET_BASE_URL}/courier/track/shipment/${shipmentId}`, //https://apiv2.shiprocket.in/v1/external/courier/track/shipment/{shipmentId}
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -173,5 +173,5 @@ module.exports = {
   createShiprocketOrder,
   trackShipment,
   cancelShipment,
-  getAllPickupLocations, // Export the function
+  getAllPickupLocations,
 };
