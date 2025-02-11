@@ -87,7 +87,7 @@ const login = async (req, res) => {
       .status(200)
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "None",
         secure: true,
       })
       .json({
@@ -110,7 +110,7 @@ const logout = async (_, res) => {
       .status(200)
       .clearCookie("token", {
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "None",
         secure: true,
         path: "/",
       })
