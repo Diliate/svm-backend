@@ -256,7 +256,10 @@ const addProduct = async (req, res) => {
   } = req.body;
 
   const imageUrls = req.files.map(
-    (file) => `http://localhost:5000/uploads/${path.basename(file.path)}`
+    (file) =>
+      `https://svm-backend-iy0e.onrender.com/uploads/${path.basename(
+        file.path
+      )}`
   );
 
   try {
