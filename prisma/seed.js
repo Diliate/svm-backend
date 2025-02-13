@@ -292,7 +292,7 @@ async function seed() {
           description:
             "HEALTH TONE Syrup is a general tonic that helps address physical and mental debility, anemia, calcium deficiency, chronic fatigue, and indigestion. It supports liver health and provides relief during pregnancy. Additionally, it acts as a demulcent, offering natural relief in cough management, and works as a gentle bronchodilator to support normal breathing without sedative side effects.",
           inStock: true,
-          categoryId: "	7b747c4e-5940-41b8-bafe-9af4bec14fcc",
+          categoryId: "7b747c4e-5940-41b8-bafe-9af4bec14fcc",
           precautions: [
             "Store in a cool and dry away from direct sunlight.",
             "Read the product label carefully before use.",
@@ -338,7 +338,7 @@ async function seed() {
           description:
             "PILE-C Capsules are effective in managing bleeding piles, anal fissures, fistulas, and hemorrhoids. They help alleviate pain, swelling, and itching in the anal region, and provide relief from chronic constipation that causes strain during bowel movements. PILE-C also aids in reducing bleeding during defecation caused by damaged blood vessels inflammation. ",
           inStock: true,
-          categoryId: "	4e1ce729-21c4-4eb2-bd60-74ac606a9993",
+          categoryId: "4e1ce729-21c4-4eb2-bd60-74ac606a9993",
           precautions: [
             "Store in a cool and dry away from direct sunlight.",
             "Read the product label carefully before use.",
@@ -475,7 +475,7 @@ async function seed() {
           description:
             "PLATE-WIN Capsules/Syrup are enriched with powerful ingredients like Giloy, Tulsi, Papaya leaf, Kiwi, Wheat grass, Black pepper, and Amla, designed to enhance platelet count. They provide immune system support and improve RBC production, making them beneficial for conditions like Dengue, Chikungunya, Swine Flu, Typhoid, and viral infections. Additionally, they aid in relieving acidity, indigestion, and flu symptoms. ",
           inStock: true,
-          categoryId: "	b403a988-0584-4bd8-b62d-4462a815718f",
+          categoryId: "b403a988-0584-4bd8-b62d-4462a815718f",
           precautions: [
             "Store in a cool and dry away from direct sunlight.",
             "Read the product label carefully before use.",
