@@ -324,7 +324,13 @@ const updateProduct = async (req, res) => {
     discountExpiry,
   } = req.body;
 
-  const imageUrls = req.files?.map((file) => file.path) || [];
+  const imageUrls =
+    req.files?.map(
+      (file) =>
+        `https://svm-backend-iy0e.onrender.com/uploads/${path.basename(
+          file.path
+        )}`
+    ) || [];
 
   try {
     const product = await prisma.product.update({

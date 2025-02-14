@@ -6,7 +6,7 @@ async function seed() {
       data: [
         {
           name: "CUFF-C Syrup  ",
-          price: 229,
+          price: 200,
           indications:
             "Dry Cough, Allergic cough, Tonsilitis, Cough, Sinusitis, Nas bronchial allergy.",
           description:
@@ -21,16 +21,15 @@ async function seed() {
           ],
           punchline:
             "Changes In Season Has Every Reason for Cough & Congestion, A Herbal Cough Reliever",
-          quantity: "200 ml",
+          quantity: "50 ml",
           dosage:
             "One or Two teaspoon three times a day or as directed by the physician. ",
-          imageUrls: ["", "", "", ""],
           featured: true,
           limitedOffer: false,
         },
         {
-          name: "LIV- C SYRUP",
-          price: 219,
+          name: "LIV-C SYRUP",
+          price: 200,
           indications:
             "Hepatomegally, Alcoholic Liver Disease, Hepo Biliary Disorders, Loss of Appetite, Jaundice, Constipation.",
           description:
@@ -45,16 +44,15 @@ async function seed() {
           ],
           punchline:
             "THE SUPERIOR STRENGTH GIVES CONVENIENT DOSAGE AND EXCELLENT EFFICIENCY ",
-          quantity: "100 ml",
+          quantity: "200 ml",
           dosage:
-            "Two teaspoon three times a day or as directed by the physician. ",
-          imageUrls: ["", "", "", ""],
+            "Two teaspoon three times a day or as directed by the physician.",
           featured: true,
           limitedOffer: false,
         },
         {
           name: "MEDILIV – DS SYRUP",
-          price: 329.99,
+          price: 220,
           indications:
             "Eniarged or Fatty Liver, Anorexia Hepalitis with or without Jaundice, Hepatic Dystunction & Nutritional Disorders.  ",
           description:
@@ -71,13 +69,35 @@ async function seed() {
           quantity: "200 ml",
           dosage:
             "Two teaspoon three times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: true,
           limitedOffer: false,
         },
         {
-          name: "ORTHONOVA OIL / CAPSULES",
-          price: 119.99,
+          name: "ORTHONOVA OIL",
+          price: 195,
+          indications:
+            "Rheumatoid Arthritis Pain, Inflammation, Leg Cramps, Cervical & Lumber, Spondylosis, Stiffness, Backache & Muscular Pains.",
+          description:
+            "ORTHONOVA effectively relieves rheumatoid arthritis, inflammation, and muscle pain while reducing swelling and tenderness. It restores smooth, painfree movement of joints and enhances overall mobility. This powerful formula supports joint health, allowing you to engage in daily activities with ease. Trust ORTHONOVA for comprehensive pain management. ",
+          inStock: true,
+          categoryId: "d315b05e-9758-43a6-b8a7-32e252f57af7",
+          precautions: [
+            "Store in a cool and dry away from direct sunlight.",
+            "Read the product label carefully before use.",
+            "Keep out of reach of children.",
+            "Do not exceed the recommended dosage ",
+          ],
+          punchline:
+            "RESTORE FLEXIBILITY OF JOINTS, A HERBAL MOBILITY RESTORER ",
+          quantity: "50 ml",
+          dosage:
+            "To be massaged gently into the skin over the affected areas.",
+          featured: false,
+          limitedOffer: true,
+        },
+        {
+          name: "ORTHONOVA CAPSULES",
+          price: 220,
           indications:
             "Rheumatoid Arthritis Pain, Inflammation, Leg Cramps, Cervical & Lumber, Spondylosis, Stiffness, Backache & Muscular Pains.",
           description:
@@ -93,15 +113,13 @@ async function seed() {
           punchline:
             "RESTORE FLEXIBILITY OF JOINTS, A HERBAL MOBILITY RESTORER ",
           quantity: "",
-          dosage:
-            "To be massaged gently into the skin over the affected areas.",
-          imageUrls: ["", "", "", ""],
+          dosage: "As directed by the physician.",
           featured: false,
           limitedOffer: true,
         },
         {
           name: "MILAN TIME FORTE CAPSULES",
-          price: 250,
+          price: 280,
           indications:
             "Strong aphrodisiac libido in both men and women, prevents functional impotence premature ejaculation and prolongs performance in men, spermatorrhoes, Impotency, Benign Prostatic enlargement. ",
           description:
@@ -118,13 +136,11 @@ async function seed() {
           quantity: "",
           dosage:
             "Take two Capsules with milk or water 1-2 times a day or as directed by the physician. ",
-          imageUrls: ["", "", "", ""],
-          featured: true,
           limitedOffer: false,
         },
         {
           name: "HI – TIME CAPSULES",
-          price: 319,
+          price: 280,
           indications:
             "Strong aphrodisiac libido in both men and women, prevents functional impotence premature ejaculation and prolongs performance in men, spermatorrhoes, Impotancy, Benign Prostatic enlargement. ",
           description:
@@ -141,13 +157,11 @@ async function seed() {
           quantity: "",
           dosage:
             "Take two Hi-Time Gold Capsules with milk or water 1-2 times a day or as directed by the physician ",
-          imageUrls: ["", "", "", ""],
-          featured: true,
           limitedOffer: true,
         },
         {
           name: "BRAIN - UP SYRUP",
-          price: 239,
+          price: 200,
           indications:
             "Nervine Tonic, Boosting Memory, Anxiety Neurosis, daily mental health supplement for professional, students & useful in migraine. ",
           description:
@@ -165,13 +179,12 @@ async function seed() {
           quantity: "200 ml",
           dosage:
             "One or Two teaspoon 3 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: true,
           limitedOffer: false,
         },
         {
           name: "CUFFY-DS COUGH SYRUP",
-          price: 19.99,
+          price: 135,
           indications:
             "Dry Cough, Allergic cough, Tonsilitis, Whooping cough, Productive cough, Smoker’s cough, Sinusitis, Nasobronchial allergy. ",
           description:
@@ -185,16 +198,15 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline: "A HERBAL EXPECTORANT WITH TULSI & HONEY",
-          quantity: "",
+          quantity: "50 ml",
           dosage:
             "One or two teaspoon three times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: true,
           limitedOffer: true,
         },
         {
           name: "MOSAFA KHOON SYRUP",
-          price: 293,
+          price: 200,
           indications:
             "Helps to purify blood, allergic & Chronic disorders of skin, Useful in boils, Eczema, scabies, Ringworm, Pimples, Fungal infections & Gout, Bring glow to skin. ",
           description:
@@ -208,16 +220,14 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline: "A HERBAL BLOOD PRUIFIER ",
-          quantity: "100 ml",
+          quantity: "200 ml",
           dosage:
             "One or two teaspoon 3 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
-          featured: true,
           limitedOffer: false,
         },
         {
-          name: "VIC-Z-FORTE CAPSULES / SYRUP",
-          price: 300,
+          name: "VIC-Z-FORTE CAPSULES",
+          price: 200,
           indications:
             "General weakness, Anorexia, Calcium deficiency, Chronic mental debility, Liver tonic, Nervousness, Indigestion Insomnia. ",
           description:
@@ -231,16 +241,58 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline: "ESSENTIAL VITAMINS & MINERALS FOR OPTIMAL HEALTH",
-          quantity: "50",
+          quantity: "",
           dosage:
             "One or two capsules three times a day or as directed by the physician.",
-          imageUrls: ["image3.jpg", "image4.jpg"],
           featured: false,
           limitedOffer: true,
         },
         {
-          name: "MUFFER SYRUP / CAPSULES",
-          price: 250,
+          name: "VIC-Z-FORTE SYRUP",
+          price: 200,
+          indications:
+            "General weakness, Anorexia, Calcium deficiency, Chronic mental debility, Liver tonic, Nervousness, Indigestion Insomnia. ",
+          description:
+            "This tonic provides essential vitamins and minerals to combat general weakness, anorexia, calcium deficiency, and nervousness.It supports liver health, improves digestion, and helps with insomnia,strengthening the body’s resistance. Ideal for recovery and restoring vitality.",
+          inStock: true,
+          categoryId: "41998b58-c754-406c-aa2d-dd7c5d103582",
+          precautions: [
+            "Store in a cool and dry away from direct sunlight.",
+            "Read the product label carefully before use.",
+            "Keep out of reach of children.",
+            "Do not exceed the recommended dosage ",
+          ],
+          punchline: "ESSENTIAL VITAMINS & MINERALS FOR OPTIMAL HEALTH",
+          quantity: "200 ml",
+          dosage: "As directed by the physician.",
+          featured: false,
+          limitedOffer: true,
+        },
+        {
+          name: "MUFFER SYRUP",
+          price: 200,
+          indications:
+            "General tonic for physical and mental debility, Anaemia, Calcium deficiency, Chronic fatigue syndrome, General debility during pregnancy, Insomnia, Indigestion and Liver tonic. ",
+          description:
+            "MUFFER Syrup/Capsules provide a rich source of calcium, vitamin C, and iron, helping to combat physical and mental fatigue, anemia, calcium deficiency, and general weakness. It supports liver health, aids digestion, and promotes restful sleep. Ideal for use during pregnancy, recovery, and to strengthen the body's resistance.",
+          inStock: true,
+          categoryId: "41998b58-c754-406c-aa2d-dd7c5d103582",
+          precautions: [
+            "Store in a cool and dry away from direct sunlight.",
+            "Read the product label carefully before use.",
+            "Keep out of reach of children.",
+            "Do not exceed the recommended dosage ",
+          ],
+          punchline: "A COMPLETE TONIC FOR ALL AGES ",
+          quantity: "200 ml",
+          dosage:
+            "One or two teaspoon 3 times a day or as directed by the physician.",
+          featured: true,
+          limitedOffer: false,
+        },
+        {
+          name: "MUFFER CAPSULES",
+          price: 180,
           indications:
             "General tonic for physical and mental debility, Anaemia, Calcium deficiency, Chronic fatigue syndrome, General debility during pregnancy, Insomnia, Indigestion and Liver tonic. ",
           description:
@@ -255,15 +307,13 @@ async function seed() {
           ],
           punchline: "A COMPLETE TONIC FOR ALL AGES ",
           quantity: "",
-          dosage:
-            "One or two teaspoon 3 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
+          dosage: "As directed by the physician.",
           featured: true,
           limitedOffer: false,
         },
         {
-          name: "CAL-C SYRUP / CAPSULES",
-          price: 300,
+          name: "CAL-C SYRUP",
+          price: 200,
           indications:
             "Helps disintegration of Calculus, Flushes out crystal by diuretic action, helps relieve the pains, chronic infections.",
           description:
@@ -277,16 +327,15 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline: "NATURALLY POWERFUL HERBAL REMEDY FOR CALCULUS CARE ",
-          quantity: "50",
+          quantity: "200 ml",
           dosage:
             "One or two capsules three times a day or as directed by the physician. ",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: true,
         },
         {
           name: "HEALTH-TONE SYRUP",
-          price: 210,
+          price: 200,
           indications:
             "General tonic for physical and mental debility, Anaemia, Calcium deficiency, Chronic fatigue syndrome, General debility during pregnancy, Insomnia, Indigestion and Liver tonic.",
           description:
@@ -303,13 +352,12 @@ async function seed() {
           quantity: "200 ml",
           dosage:
             "One or two teaspoon 3 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: false,
         },
         {
           name: "DIAB-C CAPSULES",
-          price: 180,
+          price: 175,
           indications:
             "General tonic for Diabetic control, Reduces risk of diabetic complications. ",
           description:
@@ -326,13 +374,12 @@ async function seed() {
           quantity: "",
           dosage:
             "One or two capsules three times a day or as directed by the physician. ",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: true,
         },
         {
           name: "PILE-C CAPSULES",
-          price: 320,
+          price: 175,
           indications:
             "Useful in bleeding piles, Analfissure, Fistula internal, Haemarrhoids ",
           description:
@@ -349,13 +396,12 @@ async function seed() {
           quantity: "",
           dosage:
             "One or two capsules 2 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: false,
         },
         {
           name: "RESLIM-A CAPSULES",
-          price: 240,
+          price: 150,
           indications:
             "Reduce obesity and fat. Safe ayurvedic propriety medicine",
           description:
@@ -372,13 +418,12 @@ async function seed() {
           quantity: "",
           dosage:
             " One or two capsules three times a day or as directed by the physician.",
-          imageUrls: ["image3.jpg", "image4.jpg"],
           featured: false,
           limitedOffer: true,
         },
         {
-          name: "NERV-C CAPSULES",
-          price: 190,
+          name: "NERVE-C CAPSULES",
+          price: 150,
           indications: "Anxiety, Depression, Insomnia, Anti Stress",
           description:
             "NERV-C Capsules help alleviate symptoms of anxiety, mild to moderate depression, and insomnia. They effectively combat stress, promote relaxation, and improve mental resilience, supporting overall emotional well-being. ",
@@ -391,16 +436,15 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline: "PRESERVES BRAIN, STIMULATES INNOVATIVE THINKING",
-          quantity: "10",
+          quantity: "",
           dosage:
             "One or two capsules 2 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: false,
         },
         {
           name: "BIG DESIRE CAPSULES",
-          price: 230,
+          price: 330,
           indications:
             "Strong aphrodisiac libido in both men and women, prevents functional impotence premature ejaculation and prolongs performance in men, spermatorrhoes, impotancy, benign prostatic enlargement. ",
           description:
@@ -417,13 +461,12 @@ async function seed() {
           quantity: "",
           dosage:
             "Take two Big Desire Capsules with milk or water 1-2 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: true,
         },
         {
           name: "SHILAJIT CAPSULES",
-          price: 260,
+          price: 330,
           indications:
             "Enhances overall energy and stamina, Boosts libido and supports reproductive health, Strengthens immune system. ",
           description:
@@ -440,13 +483,12 @@ async function seed() {
           quantity: "",
           dosage:
             "Take two Shilajit Capsules with milk or water 1-2 times a day or as directed by the physician. ",
-          imageUrls: ["", "", "", ""],
           featured: true,
           limitedOffer: false,
         },
         {
           name: "ASHWAGANDHA CAPSULES",
-          price: 450,
+          price: 350,
           indications:
             "Stress relief, improving energy levels, boosting immunity, enhancing cognitive function and memory, Supporting adrenal health and hormone balance. ",
           description:
@@ -463,13 +505,33 @@ async function seed() {
           quantity: "",
           dosage:
             "Take two Ashwagangha Capsules with milk or water 1-2 times a day or as directed by the physician.",
-          imageUrls: ["image3.jpg", "image4.jpg"],
           featured: false,
           limitedOffer: true,
         },
         {
-          name: "PLATE-WIN CAPSULES / SYRUP",
-          price: 240,
+          name: "PLATE-WIN SYRUP",
+          price: 200,
+          indications:
+            "Help to enhance platelets enriched with Giloy, Tulsi, Papaya leaf, Kiwi, Wheat grass, Black pepper & Amla",
+          description:
+            "PLATE-WIN Capsules/Syrup are enriched with powerful ingredients like Giloy, Tulsi, Papaya leaf, Kiwi, Wheat grass, Black pepper, and Amla, designed to enhance platelet count. They provide immune system support and improve RBC production, making them beneficial for conditions like Dengue, Chikungunya, Swine Flu, Typhoid, and viral infections. Additionally, they aid in relieving acidity, indigestion, and flu symptoms. ",
+          inStock: true,
+          categoryId: "b403a988-0584-4bd8-b62d-4462a815718f",
+          precautions: [
+            "Store in a cool and dry away from direct sunlight.",
+            "Read the product label carefully before use.",
+            "Keep out of reach of children.",
+            "Do not exceed the recommended dosage ",
+          ],
+          punchline: "EFFECTIVE AGAINST VARIOUS VIRAL INFECTIONS",
+          quantity: "200 ml",
+          dosage: "15-20ml 3 times a day or as directed by the physician.",
+          featured: false,
+          limitedOffer: false,
+        },
+        {
+          name: "PLATE-WIN CAPSULES",
+          price: 220,
           indications:
             "Help to enhance platelets enriched with Giloy, Tulsi, Papaya leaf, Kiwi, Wheat grass, Black pepper & Amla",
           description:
@@ -484,16 +546,13 @@ async function seed() {
           ],
           punchline: "EFFECTIVE AGAINST VARIOUS VIRAL INFECTIONS",
           quantity: "",
-          dosage: "15-20ml 3 times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
+          dosage: "As directed by the physician.",
           featured: false,
           limitedOffer: false,
-          discount: 10.0,
-          discountExpiry: new Date("2025-12-31T23:59:59"),
         },
         {
           name: "HEP-ZYME FORTE CAPSULES",
-          price: 160,
+          price: 200,
           indications:
             "Anorexia, Indigestion & poor assimilation, Heartburn, Jaundice, Constipation, Loss of appetite, Hepatomegally, Hepo biliery disorders, Appetizer, Carminative, Antispasmodic, Gas troubles. ",
           description:
@@ -507,17 +566,16 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline: "PROMOTES LIVER HEALTH AND DETOXIFICATION ",
-          quantity: "",
+          quantity: "200 ml",
           dosage: `Infants: 3-5 drops twice a day.
           Children: 1.5 teaspoon twice a day.  
           Adults: 2-3 teaspoon 3-4 times a day. `,
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: true,
         },
         {
           name: "SVM ALLERGY RAKSHAK Avaleha",
-          price: 240,
+          price: 195,
           indications: `Beneficial in Respiratory Allergies - Chronic cold & cough, Chronic sinusitis, Allergic rhintis, Asthma. 
           Skin Allergies: Eczema, Psoriasis, Scabies, Itchy skin, Skin rahes & Redness, Pimples.`,
           description:
@@ -531,11 +589,10 @@ async function seed() {
             "Do not exceed the recommended dosage ",
           ],
           punchline:
-            "RELIEVES RESPIRATORY ALLERGIES, PROMOTES BREATHING WELLNESS ",
+            "RELIEVES RESPIRATORY ALLERGIES, PROMOTES BREATHING WELLNESS",
           quantity: "",
           dosage:
             "1-2 tablets three times a day or as directed by the physician.",
-          imageUrls: ["", "", "", ""],
           featured: false,
           limitedOffer: false,
         },
