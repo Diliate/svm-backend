@@ -25,7 +25,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Set security HTTP headers
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false, // Allow images to be loaded from different origins
+  })
+);
 
 // Logger middleware using morgan
 app.use(morgan("dev"));
