@@ -1,39 +1,9 @@
 const prisma = require("../DB/db.config");
 const { isValidDate } = require("../helpers/userHelper");
 const path = require("path");
+const uploadOnCloudinary = require("../utils/cloudinary.js");
 
-// GET: ALL PRODUCTS WITH PAGINATION
-// const getAllProducts = async (req, res) => {
-//   const { page = 1, limit = 6 } = req.query; // Default page=1, limit=6
-//   const skip = (page - 1) * parseInt(limit);
-
-//   try {
-//     // Fetch paginated products
-//     const products = await prisma.product.findMany({
-//       skip,
-//       take: parseInt(limit),
-//       include: { category: true },
-//       orderBy: { id: "asc" }, // Ensure consistent ordering
-//     });
-
-//     // Fetch total product count (WITHOUT OFFSET)
-//     const total = await prisma.product.count();
-
-//     console.log(
-//       `Page: ${page}, Products Returned: ${products.length}, Total Products: ${total}`
-//     );
-
-//     res.status(200).json({
-//       products,
-//       total,
-//       page: parseInt(page),
-//       pages: Math.ceil(total / limit),
-//     });
-//   } catch (error) {
-//     console.error("Error fetching products:", error);
-//     res.status(500).json({ error: "Failed to fetch products." });
-//   }
-// };
+// GET: ALL PRODUCTS
 const getAllProducts = async (req, res) => {
   try {
     // Fetch all products
@@ -188,6 +158,17 @@ const getProductById = async (req, res) => {
   }
 };
 
+// DELETE: DELETE PRODUCT
+const deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await prisma.product.delete({ where: { id } });
+    res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete product." });
+  }
+};
+
 // POST: ADD PRODUCT
 // const addProduct = async (req, res) => {
 //   const {
@@ -207,7 +188,12 @@ const getProductById = async (req, res) => {
 //     discountExpiry,
 //   } = req.body;
 
-//   const imageUrls = req.files.map((file) => file.path);
+//   const imageUrls = req.files.map(
+//     (file) =>
+//       `https://svm-backend-iy0e.onrender.com/uploads/${path.basename(
+//         file.path
+//       )}`
+//   );
 
 //   try {
 //     const product = await prisma.product.create({
@@ -226,7 +212,9 @@ const getProductById = async (req, res) => {
 //         featured: featured === "true",
 //         limitedOffer: limitedOffer === "true",
 //         discount: discount ? parseFloat(discount) : 0,
-//         discountExpiry: discountExpiry ? new Date(discountExpiry) : null,
+//         discountExpiry: isValidDate(discountExpiry)
+//           ? new Date(discountExpiry)
+//           : null,
 //       },
 //     });
 //     res.status(201).json(product);
@@ -237,6 +225,7 @@ const getProductById = async (req, res) => {
 //       .json({ error: "Failed to add product.", details: error.message });
 //   }
 // };
+
 const addProduct = async (req, res) => {
   const {
     name,
@@ -255,14 +244,17 @@ const addProduct = async (req, res) => {
     discountExpiry,
   } = req.body;
 
-  const imageUrls = req.files.map(
-    (file) =>
-      `https://svm-backend-iy0e.onrender.com/uploads/${path.basename(
-        file.path
-      )}`
-  );
+  const imageUrls = [];
 
   try {
+    // Upload each file to Cloudinary
+    for (const file of req.files) {
+      const uploadedImage = await uploadOnCloudinary(file.buffer); // Pass the file buffer to Cloudinary
+      if (uploadedImage) {
+        imageUrls.push(uploadedImage.url); // Store Cloudinary URL
+      }
+    }
+
     const product = await prisma.product.create({
       data: {
         name,
@@ -275,7 +267,7 @@ const addProduct = async (req, res) => {
         punchline,
         quantity,
         dosage,
-        imageUrls,
+        imageUrls, // Save image URLs from Cloudinary
         featured: featured === "true",
         limitedOffer: limitedOffer === "true",
         discount: discount ? parseFloat(discount) : 0,
@@ -284,6 +276,7 @@ const addProduct = async (req, res) => {
           : null,
       },
     });
+
     res.status(201).json(product);
   } catch (error) {
     console.error("Error adding product:", error);
@@ -293,18 +286,63 @@ const addProduct = async (req, res) => {
   }
 };
 
-// DELETE: DELETE PRODUCT
-const deleteProduct = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const product = await prisma.product.delete({ where: { id } });
-    res.status(200).json(product);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to delete product." });
-  }
-};
-
 // PUT: UPDATE PRODUCT
+// const updateProduct = async (req, res) => {
+//   const { id } = req.params;
+//   const {
+//     name,
+//     price,
+//     indications,
+//     description,
+//     inStock,
+//     categoryId,
+//     precautions,
+//     punchline,
+//     quantity,
+//     dosage,
+//     featured,
+//     limitedOffer,
+//     discount,
+//     discountExpiry,
+//   } = req.body;
+
+//   const imageUrls =
+//     req.files?.map(
+//       (file) =>
+//         `https://svm-backend-iy0e.onrender.com/uploads/${path.basename(
+//           file.path
+//         )}`
+//     ) || [];
+
+//   try {
+//     const product = await prisma.product.update({
+//       where: { id },
+//       data: {
+//         name,
+//         price: parseFloat(price),
+//         indications,
+//         description,
+//         inStock: inStock === "true",
+//         categoryId,
+//         precautions: precautions.split(","),
+//         punchline,
+//         quantity,
+//         dosage,
+//         imageUrls: imageUrls.length > 0 ? { push: imageUrls } : undefined,
+//         featured: featured === "true",
+//         limitedOffer: limitedOffer === "true",
+//         discount: discount ? parseFloat(discount) : 0,
+//         discountExpiry: isValidDate(discountExpiry)
+//           ? new Date(discountExpiry)
+//           : null,
+//       },
+//     });
+
+//     res.status(200).json(product);
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to update product." });
+//   }
+// };
 const updateProduct = async (req, res) => {
   const { id } = req.params;
   const {
@@ -324,15 +362,17 @@ const updateProduct = async (req, res) => {
     discountExpiry,
   } = req.body;
 
-  const imageUrls =
-    req.files?.map(
-      (file) =>
-        `https://svm-backend-iy0e.onrender.com/uploads/${path.basename(
-          file.path
-        )}`
-    ) || [];
+  const imageUrls = [];
 
   try {
+    // Upload files to Cloudinary
+    for (const file of req.files) {
+      const uploadedImage = await uploadOnCloudinary(file.buffer); // Use buffer for Cloudinary upload
+      if (uploadedImage) {
+        imageUrls.push(uploadedImage.url); // Store Cloudinary URL
+      }
+    }
+
     const product = await prisma.product.update({
       where: { id },
       data: {
@@ -346,7 +386,7 @@ const updateProduct = async (req, res) => {
         punchline,
         quantity,
         dosage,
-        imageUrls: imageUrls.length > 0 ? { push: imageUrls } : undefined,
+        imageUrls: imageUrls.length > 0 ? { push: imageUrls } : undefined, // Append new images if any
         featured: featured === "true",
         limitedOffer: limitedOffer === "true",
         discount: discount ? parseFloat(discount) : 0,

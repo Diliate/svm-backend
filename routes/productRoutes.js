@@ -16,8 +16,8 @@ router.get("/discounted", productController.getDiscountedProducts); // Fetch dis
 router.get("/:id", productController.getProductById);
 
 // CRUD operations (ADD, UPDATE, DELETE PRODUCTS)
-router.post("/", upload.array("images", 5), productController.addProduct); // Add a new product
-router.put("/:id", upload.array("images", 5), productController.updateProduct); // Update a product
-router.delete("/:id", productController.deleteProduct); // Delete a product
+router.post("/", upload.array("images", 3), productController.addProduct);
+router.put("/:id", upload.array("images", 3), productController.updateProduct);
+router.delete("/:id", productController.deleteProduct);
 
 module.exports = router;
