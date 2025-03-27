@@ -3,7 +3,11 @@ const jwt = require("jsonwebtoken");
 const { createUser, updateUser } = require("../helpers/userHelper");
 const { generateOTP, sendResetEmail } = require("../services/emailService");
 const { validatePassword } = require("../utils/validation");
+const passport = require("../config/passport.js");
 const prisma = require("../DB/db.config");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const register = async (req, res) => {
   const { name, email, password, mobile } = req.body;
@@ -340,6 +344,42 @@ const resetPasswordWithOTP = async (req, res) => {
   }
 };
 
+// Google OAuth login
+const googleAuth = (req, res, next) => {
+  passport.authenticate("google", { scope: ["profile", "email"] })(
+    req,
+    res,
+    next
+  );
+};
+
+// Google OAuth callback
+const googleAuthCallback = (req, res, next) => {
+  passport.authenticate(
+    "google",
+    { failureRedirect: "/login" },
+    (err, user, info) => {
+      if (err || !user) {
+        return res.redirect("/login");
+      }
+      // Generate the JWT token
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
+      // Set the token as a secure cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "None",
+        secure: true,
+        maxAge: 365 * 24 * 60 * 60 * 1000,
+      });
+      // Encode user data and redirect to your frontend callback route
+      const encodedUser = encodeURIComponent(JSON.stringify(user));
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/auth/google/callback?user=${encodedUser}`
+      );
+    }
+  )(req, res, next);
+};
+
 module.exports = {
   register,
   login,
@@ -349,4 +389,6 @@ module.exports = {
   changePassword,
   requestResetOTP,
   resetPasswordWithOTP,
+  googleAuth,
+  googleAuthCallback,
 };
