@@ -8,6 +8,8 @@ const {
   requestResetOTP,
   resetPasswordWithOTP,
   changePassword,
+  googleAuth,
+  googleAuthCallback,
 } = require("../controllers/authController");
 const { isAuthenticated } = require("../middleware/authMiddleware");
 
@@ -18,6 +20,11 @@ router.post("/register", register);
 
 // POST: Login Route with Validation
 router.post("/login", login);
+
+router.get("/google", googleAuth);
+
+// GET: Google OAuth Callback Route
+router.get("/google/callback", googleAuthCallback);
 
 // UPDATE: User Details Route
 router.put("/update", isAuthenticated, updateUserDetails);
