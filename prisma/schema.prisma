@@ -100,16 +100,17 @@ enum AddressType {
 }
 
 model Address {
-  id        Int         @id @default(autoincrement())
-  type      AddressType @default(HOME)
-  area      String
-  city      String
-  state     String
-  zipCode   String
-  userId    Int
-  user      User        @relation(fields: [userId], references: [id])
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id           Int         @id @default(autoincrement())
+  type         AddressType @default(HOME)
+  addressLine1 String      @default("No Address Provided")
+  addressLine2 String?
+  city         String
+  state        String
+  zipCode      String
+  userId       Int
+  user         User        @relation(fields: [userId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   // New Relation: An address can be associated with multiple orders
   orders Order[]

@@ -5,21 +5,23 @@ const ALLOWED_ADDRESS_TYPES = ["HOME", "OFFICE", "OTHER"];
 
 // Add an address
 const addAddress = async (req, res) => {
-  // Defensive check for req.user
+  // Check if user is authenticated
   if (!req.user || !req.user.id) {
     return res
       .status(401)
       .json({ message: "Unauthorized: User information missing." });
   }
 
-  const { id: userId } = req.user; // User ID from the authentication middleware
-  const { area, city, state, zipCode, type } = req.body;
+  const { id: userId } = req.user;
+  // Destructure new address fields from the request body
+  const { addressLine1, addressLine2, city, state, zipCode, type } = req.body;
 
   try {
-    // Validate input fields
-    if (!area || !city || !state || !zipCode || !type) {
+    // Validate required fields (addressLine2 is optional)
+    if (!addressLine1 || !city || !state || !zipCode || !type) {
       return res.status(400).json({
-        message: "All fields (area, city, state, zipCode, type) are required.",
+        message:
+          "All fields (addressLine1, city, state, zipCode, type) are required.",
       });
     }
 
@@ -32,9 +34,17 @@ const addAddress = async (req, res) => {
       });
     }
 
-    // Create a new address associated with the user
+    // Create a new address using the new schema fields
     const address = await prisma.address.create({
-      data: { area, city, state, zipCode, userId, type: type.toUpperCase() },
+      data: {
+        addressLine1,
+        addressLine2,
+        city,
+        state,
+        zipCode,
+        userId,
+        type: type.toUpperCase(),
+      },
     });
 
     res.status(201).json({ message: "Address added successfully.", address });
@@ -43,7 +53,6 @@ const addAddress = async (req, res) => {
     res.status(500).json({ message: `Server error: ${error.message}` });
   }
 };
-
 // Remove an address
 const removeAddress = async (req, res) => {
   // Defensive check for req.user
@@ -83,23 +92,16 @@ const removeAddress = async (req, res) => {
 
 // Get all addresses for a user
 const getAddresses = async (req, res) => {
-  // Defensive check for req.user
-  if (!req.user || !req.user.id) {
-    return res
-      .status(401)
-      .json({ message: "Unauthorized: User information missing." });
-  }
-
   const { id: userId } = req.user;
 
   try {
-    // Fetch all addresses associated with the user
     const addresses = await prisma.address.findMany({
       where: { userId },
       select: {
         id: true,
         type: true,
-        area: true,
+        addressLine1: true,
+        addressLine2: true,
         city: true,
         state: true,
         zipCode: true,
