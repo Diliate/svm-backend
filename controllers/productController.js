@@ -69,9 +69,9 @@ const getFeaturedProducts = async (req, res) => {
       include: { category: true },
     });
 
-    if (products.length === 0) {
-      return res.status(404).json({ message: "No featured products found" });
-    }
+    // if (products.length === 0) {
+    //   return res.status(404).json({ message: "No featured products found" });
+    // }
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch featured products." });
@@ -91,11 +91,11 @@ const getLimitedOfferProducts = async (req, res) => {
       include: { category: true },
     });
 
-    if (products.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No limited offer products found" });
-    }
+    // if (products.length === 0) {
+    //   return res
+    //     .status(404)
+    //     .json({ message: "No limited offer products found" });
+    // }
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch limited offer products." });
@@ -113,9 +113,9 @@ const getDiscountedProducts = async (req, res) => {
       include: { category: true },
     });
 
-    if (products.length === 0) {
-      return res.status(404).json({ message: "No discounted products found" });
-    }
+    // if (products.length === 0) {
+    //   return res.status(404).json({ message: "No discounted products found" });
+    // }
     res.status(200).json(products);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch discounted products." });
