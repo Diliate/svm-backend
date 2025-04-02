@@ -25,6 +25,13 @@ const addAddress = async (req, res) => {
       });
     }
 
+    // Check if the zip code is exactly 6 digits
+    if (!/^\d{6}$/.test(zipCode.toString())) {
+      return res
+        .status(400)
+        .json({ message: "Zip code must be exactly 6 digits." });
+    }
+
     // Validate address type
     if (!ALLOWED_ADDRESS_TYPES.includes(type.toUpperCase())) {
       return res.status(400).json({
@@ -53,6 +60,7 @@ const addAddress = async (req, res) => {
     res.status(500).json({ message: `Server error: ${error.message}` });
   }
 };
+
 // Remove an address
 const removeAddress = async (req, res) => {
   // Defensive check for req.user
