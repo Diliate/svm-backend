@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 const isAuthenticated = async (req, res, next) => {
   try {
-    // Log the incoming request method
     console.log(`Incoming Request Method: ${req.method}`);
 
     // Bypass OPTIONS requests
@@ -11,7 +10,9 @@ const isAuthenticated = async (req, res, next) => {
       return next();
     }
 
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+    // Extract token from the Authorization header (e.g., "Bearer <token>")
+    const token = req.headers.authorization?.split(" ")[1];
+
     if (!token) {
       console.log("Authentication failed: No token provided.");
       return res.status(401).json({
@@ -22,17 +23,9 @@ const isAuthenticated = async (req, res, next) => {
 
     // Verify and decode the token
     const decode = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded JWT Payload:", decode); // Debugging line
+    console.log("Decoded JWT Payload:", decode);
 
-    if (!decode) {
-      console.log("Authentication failed: Invalid token.");
-      return res.status(401).json({
-        success: false,
-        message: "Invalid token",
-      });
-    }
-
-    // Adjust based on the actual payload
+    // Set user details based on decoded token
     req.user = { id: decode.userId || decode.id };
     console.log(`Authenticated User ID: ${req.user.id}`);
 

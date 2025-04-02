@@ -85,21 +85,16 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials." });
     }
 
+    // Generate the JWT token
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
 
-    return res
-      .status(200)
-      .cookie("token", token, {
-        httpOnly: true,
-        sameSite: "None",
-        secure: true,
-        maxAge: 365 * 24 * 60 * 60 * 1000,
-      })
-      .json({
-        success: true,
-        message: "Logged in successfully.",
-        user,
-      });
+    // Return token in response body
+    return res.status(200).json({
+      success: true,
+      message: "Logged in successfully.",
+      token,
+      user,
+    });
   } catch (error) {
     console.log("Error logging User: ", error);
     res.status(500).json({
@@ -111,20 +106,14 @@ const login = async (req, res) => {
 
 const logout = async (_, res) => {
   try {
-    return res
-      .status(200)
-      .clearCookie("token", {
-        httpOnly: true,
-        sameSite: "None",
-        secure: true,
-        path: "/",
-      })
-      .json({
-        success: true,
-        message: "User logged out successfully",
-      });
+    // Since the token is stored in localStorage on the client side,
+    // we only need to send a response indicating a successful logout.
+    return res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
   } catch (error) {
-    console.log("Error loggin out: ", error);
+    console.error("Error logging out:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
