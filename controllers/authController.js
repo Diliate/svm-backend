@@ -353,17 +353,11 @@ const googleAuthCallback = (req, res, next) => {
       }
       // Generate the JWT token
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET);
-      // Set the token as a secure cookie
-      res.cookie("token", token, {
-        httpOnly: true,
-        sameSite: "None",
-        secure: true,
-        maxAge: 365 * 24 * 60 * 60 * 1000,
-      });
-      // Encode user data and redirect to your frontend callback route
+      // Encode user data and token in the redirect URL
       const encodedUser = encodeURIComponent(JSON.stringify(user));
+      const encodedToken = encodeURIComponent(token);
       return res.redirect(
-        `${process.env.FRONTEND_URL}/auth/google/callback?user=${encodedUser}`
+        `${process.env.FRONTEND_URL}/auth/google/callback?user=${encodedUser}&token=${encodedToken}`
       );
     }
   )(req, res, next);
